@@ -1,0 +1,696 @@
+{
+  "persons": [
+    {
+      "id": 1,
+      "name": "雨落止星棠",
+      "title": "",
+      "color": "#d9a7c7"
+    },
+    {
+      "id": 2,
+      "name": "熙扶月",
+      "title": "",
+      "color": "#d9a7c7"
+    },
+    {
+      "id": 3,
+      "name": "衣青黛",
+      "title": "",
+      "color": "#d9a7c7"
+    },
+    {
+      "id": 4,
+      "name": "忆春语",
+      "title": "",
+      "color": "#d9a7c7"
+    },
+    {
+      "id": 5,
+      "name": "醉余晚",
+      "title": "",
+      "color": "#d9a7c7"
+    },
+    {
+      "id": 6,
+      "name": "绾月尘",
+      "title": "",
+      "color": "#d9a7c7"
+    },
+    {
+      "id": 7,
+      "name": "南官沁婉",
+      "title": "",
+      "color": "#d9a7c7"
+    },
+    {
+      "id": 8,
+      "name": "洋多余",
+      "title": "",
+      "color": "#d9a7c7"
+    },
+    {
+      "id": 9,
+      "name": "黎氿瑜",
+      "title": "",
+      "color": "#d9a7c7"
+    },
+    {
+      "id": 10,
+      "name": "天邪玄尊",
+      "title": "",
+      "color": "#d9a7c7"
+    },
+    {
+      "id": 11,
+      "name": "迦颐",
+      "title": "",
+      "color": "#d9a7c7"
+    },
+    {
+      "id": 12,
+      "name": "我真的爱吃饭",
+      "title": "",
+      "color": "#d9a7c7"
+    },
+    {
+      "id": 13,
+      "name": "昝千然",
+      "title": "",
+      "color": "#d9a7c7"
+    },
+    {
+      "id": 14,
+      "name": "弢藏",
+      "title": "",
+      "color": "#d9a7c7"
+    },
+    {
+      "id": 15,
+      "name": "洛溪霜枫",
+      "title": "",
+      "color": "#d9a7c7"
+    },
+    {
+      "id": 16,
+      "name": "小卢打小旭",
+      "title": "",
+      "color": "#d9a7c7"
+    },
+    {
+      "id": 17,
+      "name": "骑老奶闯红灯",
+      "title": "",
+      "color": "#d9a7c7"
+    },
+    {
+      "id": 18,
+      "name": "竹墨染",
+      "title": "",
+      "color": "#d9a7c7"
+    },
+    {
+      "id": 19,
+      "name": "黄老妖",
+      "title": "",
+      "color": "#d9a7c7"
+    },
+    {
+      "id": 20,
+      "name": "叶成槿",
+      "title": "",
+      "color": "#d9a7c7"
+    }
+  ],
+  "relations": [
+    {
+      "id": 1,
+      "sourceId": 1,
+      "targetId": 2,
+      "name": "大徒弟"
+    },
+    {
+      "id": 2,
+      "sourceId": 2,
+      "targetId": 1,
+      "name": "师父"
+    },
+    {
+      "id": 3,
+      "sourceId": 1,
+      "targetId": 2,
+      "name": "侠缘"
+    },
+    {
+      "id": 4,
+      "sourceId": 2,
+      "targetId": 1,
+      "name": "侠缘"
+    },
+    {
+      "id": 5,
+      "sourceId": 1,
+      "targetId": 2,
+      "name": "结义"
+    },
+    {
+      "id": 6,
+      "sourceId": 2,
+      "targetId": 1,
+      "name": "结义"
+    },
+    {
+      "id": 11,
+      "sourceId": 1,
+      "targetId": 3,
+      "name": "二徒弟"
+    },
+    {
+      "id": 12,
+      "sourceId": 1,
+      "targetId": 3,
+      "name": "结义"
+    },
+    {
+      "id": 13,
+      "sourceId": 3,
+      "targetId": 1,
+      "name": "结义"
+    },
+    {
+      "id": 14,
+      "sourceId": 1,
+      "targetId": 4,
+      "name": "三徒弟"
+    },
+    {
+      "id": 16,
+      "sourceId": 4,
+      "targetId": 1,
+      "name": "师父"
+    },
+    {
+      "id": 18,
+      "sourceId": 1,
+      "targetId": 4,
+      "name": "结义"
+    },
+    {
+      "id": 19,
+      "sourceId": 4,
+      "targetId": 1,
+      "name": "结义"
+    },
+    {
+      "id": 20,
+      "sourceId": 11,
+      "targetId": 1,
+      "name": "大徒弟"
+    },
+    {
+      "id": 21,
+      "sourceId": 1,
+      "targetId": 11,
+      "name": "师父"
+    },
+    {
+      "id": 23,
+      "sourceId": 1,
+      "targetId": 12,
+      "name": "二师弟"
+    },
+    {
+      "id": 24,
+      "sourceId": 1,
+      "targetId": 13,
+      "name": "三师弟"
+    },
+    {
+      "id": 25,
+      "sourceId": 1,
+      "targetId": 12,
+      "name": "结义"
+    },
+    {
+      "id": 26,
+      "sourceId": 12,
+      "targetId": 1,
+      "name": "结义"
+    },
+    {
+      "id": 27,
+      "sourceId": 2,
+      "targetId": 3,
+      "name": "二师妹"
+    },
+    {
+      "id": 29,
+      "sourceId": 2,
+      "targetId": 4,
+      "name": "三师弟"
+    },
+    {
+      "id": 31,
+      "sourceId": 2,
+      "targetId": 5,
+      "name": "大徒弟"
+    },
+    {
+      "id": 35,
+      "sourceId": 3,
+      "targetId": 4,
+      "name": "三师弟"
+    },
+    {
+      "id": 37,
+      "sourceId": 4,
+      "targetId": 3,
+      "name": "侠缘"
+    },
+    {
+      "id": 38,
+      "sourceId": 3,
+      "targetId": 4,
+      "name": "结义"
+    },
+    {
+      "id": 39,
+      "sourceId": 4,
+      "targetId": 3,
+      "name": "结义"
+    },
+    {
+      "id": 40,
+      "sourceId": 2,
+      "targetId": 3,
+      "name": "结义"
+    },
+    {
+      "id": 41,
+      "sourceId": 3,
+      "targetId": 2,
+      "name": "结义"
+    },
+    {
+      "id": 42,
+      "sourceId": 2,
+      "targetId": 4,
+      "name": "结义"
+    },
+    {
+      "id": 43,
+      "sourceId": 4,
+      "targetId": 2,
+      "name": "结义"
+    },
+    {
+      "id": 44,
+      "sourceId": 3,
+      "targetId": 1,
+      "name": "师父"
+    },
+    {
+      "id": 45,
+      "sourceId": 3,
+      "targetId": 2,
+      "name": "大师姐"
+    },
+    {
+      "id": 46,
+      "sourceId": 3,
+      "targetId": 14,
+      "name": "二房"
+    },
+    {
+      "id": 47,
+      "sourceId": 14,
+      "targetId": 3,
+      "name": "二房"
+    },
+    {
+      "id": 48,
+      "sourceId": 3,
+      "targetId": 4,
+      "name": "大房"
+    },
+    {
+      "id": 49,
+      "sourceId": 4,
+      "targetId": 2,
+      "name": "大师姐"
+    },
+    {
+      "id": 51,
+      "sourceId": 3,
+      "targetId": 5,
+      "name": "三房（名义上的）"
+    },
+    {
+      "id": 52,
+      "sourceId": 4,
+      "targetId": 3,
+      "name": "二师姐"
+    },
+    {
+      "id": 53,
+      "sourceId": 4,
+      "targetId": 5,
+      "name": "情敌"
+    },
+    {
+      "id": 54,
+      "sourceId": 5,
+      "targetId": 4,
+      "name": "情敌"
+    },
+    {
+      "id": 55,
+      "sourceId": 4,
+      "targetId": 8,
+      "name": "大徒弟"
+    },
+    {
+      "id": 56,
+      "sourceId": 4,
+      "targetId": 9,
+      "name": "二徒弟"
+    },
+    {
+      "id": 57,
+      "sourceId": 4,
+      "targetId": 10,
+      "name": "三徒弟"
+    },
+    {
+      "id": 58,
+      "sourceId": 4,
+      "targetId": 14,
+      "name": "情敌"
+    },
+    {
+      "id": 59,
+      "sourceId": 14,
+      "targetId": 4,
+      "name": "情敌"
+    },
+    {
+      "id": 60,
+      "sourceId": 5,
+      "targetId": 2,
+      "name": "师父"
+    },
+    {
+      "id": 61,
+      "sourceId": 5,
+      "targetId": 6,
+      "name": "三师弟"
+    },
+    {
+      "id": 63,
+      "sourceId": 1,
+      "targetId": 15,
+      "name": "自己"
+    },
+    {
+      "id": 64,
+      "sourceId": 15,
+      "targetId": 1,
+      "name": "自己"
+    },
+    {
+      "id": 65,
+      "sourceId": 2,
+      "targetId": 15,
+      "name": "二徒弟"
+    },
+    {
+      "id": 66,
+      "sourceId": 2,
+      "targetId": 6,
+      "name": "三徒弟"
+    },
+    {
+      "id": 67,
+      "sourceId": 5,
+      "targetId": 15,
+      "name": "二师弟"
+    },
+    {
+      "id": 68,
+      "sourceId": 5,
+      "targetId": 14,
+      "name": "情敌"
+    },
+    {
+      "id": 69,
+      "sourceId": 14,
+      "targetId": 5,
+      "name": "情敌"
+    },
+    {
+      "id": 72,
+      "sourceId": 15,
+      "targetId": 5,
+      "name": "大师姐"
+    },
+    {
+      "id": 73,
+      "sourceId": 15,
+      "targetId": 6,
+      "name": "三师弟"
+    },
+    {
+      "id": 74,
+      "sourceId": 6,
+      "targetId": 2,
+      "name": "师父"
+    },
+    {
+      "id": 75,
+      "sourceId": 6,
+      "targetId": 5,
+      "name": "大师姐"
+    },
+    {
+      "id": 76,
+      "sourceId": 6,
+      "targetId": 15,
+      "name": "二师兄"
+    },
+    {
+      "id": 77,
+      "sourceId": 5,
+      "targetId": 7,
+      "name": "四师弟"
+    },
+    {
+      "id": 78,
+      "sourceId": 6,
+      "targetId": 7,
+      "name": "四师弟"
+    },
+    {
+      "id": 79,
+      "sourceId": 8,
+      "targetId": 4,
+      "name": "师父"
+    },
+    {
+      "id": 81,
+      "sourceId": 8,
+      "targetId": 9,
+      "name": "二师妹"
+    },
+    {
+      "id": 82,
+      "sourceId": 8,
+      "targetId": 10,
+      "name": "三师弟"
+    },
+    {
+      "id": 83,
+      "sourceId": 9,
+      "targetId": 8,
+      "name": "大师兄"
+    },
+    {
+      "id": 84,
+      "sourceId": 9,
+      "targetId": 10,
+      "name": "三师弟"
+    },
+    {
+      "id": 85,
+      "sourceId": 9,
+      "targetId": 4,
+      "name": "师父"
+    },
+    {
+      "id": 86,
+      "sourceId": 10,
+      "targetId": 4,
+      "name": "师父"
+    },
+    {
+      "id": 88,
+      "sourceId": 10,
+      "targetId": 8,
+      "name": "大师兄"
+    },
+    {
+      "id": 89,
+      "sourceId": 10,
+      "targetId": 9,
+      "name": "二师姐"
+    },
+    {
+      "id": 90,
+      "sourceId": 11,
+      "targetId": 12,
+      "name": "二徒弟"
+    },
+    {
+      "id": 91,
+      "sourceId": 11,
+      "targetId": 13,
+      "name": "三徒弟"
+    },
+    {
+      "id": 92,
+      "sourceId": 11,
+      "targetId": 18,
+      "name": "侠缘"
+    },
+    {
+      "id": 93,
+      "sourceId": 18,
+      "targetId": 11,
+      "name": "侠缘"
+    },
+    {
+      "id": 94,
+      "sourceId": 12,
+      "targetId": 11,
+      "name": "师父"
+    },
+    {
+      "id": 96,
+      "sourceId": 12,
+      "targetId": 1,
+      "name": "大师兄"
+    },
+    {
+      "id": 98,
+      "sourceId": 12,
+      "targetId": 13,
+      "name": "三师弟"
+    },
+    {
+      "id": 100,
+      "sourceId": 13,
+      "targetId": 11,
+      "name": "师父"
+    },
+    {
+      "id": 102,
+      "sourceId": 13,
+      "targetId": 1,
+      "name": "大师兄"
+    },
+    {
+      "id": 104,
+      "sourceId": 13,
+      "targetId": 12,
+      "name": "二师兄"
+    },
+    {
+      "id": 106,
+      "sourceId": 13,
+      "targetId": 17,
+      "name": "侠缘"
+    },
+    {
+      "id": 107,
+      "sourceId": 17,
+      "targetId": 13,
+      "name": "侠缘"
+    },
+    {
+      "id": 108,
+      "sourceId": 16,
+      "targetId": 3,
+      "name": "师父"
+    },
+    {
+      "id": 109,
+      "sourceId": 3,
+      "targetId": 16,
+      "name": "大徒弟"
+    },
+    {
+      "id": 110,
+      "sourceId": 2,
+      "targetId": 7,
+      "name": "四徒弟"
+    },
+    {
+      "id": 111,
+      "sourceId": 15,
+      "targetId": 2,
+      "name": "师父"
+    },
+    {
+      "id": 112,
+      "sourceId": 15,
+      "targetId": 7,
+      "name": "四师弟"
+    },
+    {
+      "id": 113,
+      "sourceId": 7,
+      "targetId": 2,
+      "name": "师父"
+    },
+    {
+      "id": 114,
+      "sourceId": 7,
+      "targetId": 5,
+      "name": "大师姐"
+    },
+    {
+      "id": 116,
+      "sourceId": 7,
+      "targetId": 15,
+      "name": "二师兄"
+    },
+    {
+      "id": 117,
+      "sourceId": 7,
+      "targetId": 6,
+      "name": "三师兄"
+    },
+    {
+      "id": 118,
+      "sourceId": 16,
+      "targetId": 19,
+      "name": "社长"
+    },
+    {
+      "id": 119,
+      "sourceId": 19,
+      "targetId": 16,
+      "name": "社友"
+    },
+    {
+      "id": 120,
+      "sourceId": 3,
+      "targetId": 20,
+      "name": "二徒弟"
+    },
+    {
+      "id": 121,
+      "sourceId": 20,
+      "targetId": 3,
+      "name": "师父"
+    }
+  ]
+}
