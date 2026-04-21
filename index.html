@@ -16,6 +16,7 @@
             background-repeat: no-repeat;
             background-position: center center;
             background-attachment: fixed;
+
             overflow: hidden;
             position: fixed;
             top: 0;
@@ -42,7 +43,332 @@
             cursor: pointer;
         }
         
-        /* 悬浮筛选按钮 */
+        /* ========== 电脑端左侧面板 - 顶天立地 ========== */
+        .detail-panel {
+            position: fixed;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            z-index: 100;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            pointer-events: auto;
+            display: flex;
+            align-items: stretch;
+        }
+        
+        .detail-panel.collapsed {
+            transform: translateX(-300px);
+        }
+        
+        .panel-content {
+            width: 300px;
+            background: rgba(20, 18, 35, 0.95);
+            backdrop-filter: blur(20px);
+            border-right: 1px solid rgba(255, 180, 150, 0.3);
+            padding: 20px 16px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /* 只保留一个滚动条 */
+        .panel-content {
+            scrollbar-width: thin;
+        }
+        .panel-content::-webkit-scrollbar {
+            width: 4px;
+        }
+        .panel-content::-webkit-scrollbar-track {
+            background: rgba(255,255,255,0.1);
+            border-radius: 2px;
+        }
+        .panel-content::-webkit-scrollbar-thumb {
+            background: #b86b4a;
+            border-radius: 2px;
+        }
+        
+        /* 关系列表区域 - 移除独立滚动条 */
+        .relation-list {
+            margin-top: 16px;
+            max-height: none;
+            overflow-y: visible;
+        }
+        
+        .panel-tab {
+            position: absolute;
+            right: -36px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 36px;
+            background: rgba(184, 107, 74, 0.9);
+            backdrop-filter: blur(10px);
+            border-radius: 0 12px 12px 0;
+            padding: 12px 6px;
+            cursor: pointer;
+            transition: 0.2s;
+            border: 1px solid rgba(255, 180, 150, 0.5);
+            border-left: none;
+            text-align: center;
+            color: white;
+            font-size: 14px;
+            writing-mode: vertical-rl;
+            text-orientation: mixed;
+            letter-spacing: 2px;
+        }
+        
+        .panel-tab:hover {
+            background: #d47a55;
+            width: 40px;
+            right: -40px;
+        }
+        
+        .panel-tab i {
+            writing-mode: horizontal-tb;
+            margin-bottom: 8px;
+            font-size: 18px;
+        }
+        
+        /* 头像区域 - 圆角矩形，拉长，羽化效果 */
+        .person-avatar {
+            width: 100%;
+            max-width: 260px;
+            height: auto;
+            min-height: 200px;
+            max-height: 320px;
+            margin: 0 auto 20px;
+            background: linear-gradient(135deg, #2a2545, #1a1730);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 16px;
+            overflow: hidden;
+            position: relative;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        }
+        
+        /* 边缘羽化效果 */
+        .person-avatar::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            pointer-events: none;
+            border-radius: 16px;
+            box-shadow: inset 0 0 20px rgba(255, 180, 150, 0.2), 0 0 30px rgba(0, 0, 0, 0.3);
+        }
+        
+        .person-avatar:hover {
+            transform: scale(1.01);
+            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.4);
+        }
+        
+        .person-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center top;
+        }
+        
+        .avatar-placeholder {
+            text-align: center;
+            color: #888;
+            font-size: 12px;
+            padding: 40px 20px;
+        }
+        
+        .avatar-placeholder i {
+            font-size: 48px;
+            margin-bottom: 8px;
+            display: block;
+            color: #b86b4a;
+        }
+        
+        .info-section {
+            flex: 1;
+        }
+        
+        .person-name {
+            text-align: center;
+            font-size: 22px;
+            font-weight: bold;
+            color: #ffdd99;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(255, 180, 140, 0.3);
+        }
+        
+        .info-row {
+            display: flex;
+            margin-bottom: 14px;
+            font-size: 13px;
+        }
+        
+        .info-label {
+            width: 70px;
+            color: #ffaa88;
+            font-weight: 500;
+        }
+        
+        .info-value {
+            flex: 1;
+            color: #f0e6d8;
+        }
+        
+        .relation-item {
+            font-size: 12px;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255, 180, 140, 0.15);
+            color: #ccaa88;
+        }
+        
+        .relation-item strong {
+            color: #ffaa88;
+        }
+        
+        /* 图片放大模态框 */
+        .image-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 10000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+        
+        .image-modal.show {
+            display: flex;
+        }
+        
+        .image-modal img {
+            max-width: 90%;
+            max-height: 90%;
+            object-fit: contain;
+            border-radius: 12px;
+            box-shadow: 0 0 30px rgba(0,0,0,0.5);
+        }
+        
+        .image-modal-close {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            font-size: 40px;
+            color: white;
+            cursor: pointer;
+            background: none;
+            border: none;
+            z-index: 10001;
+        }
+        
+        .image-modal-close:hover {
+            color: #ffaa88;
+        }
+        
+        /* 手机端样式 */
+        @media (max-width: 768px) {
+            .detail-panel { display: none; }
+            .mobile-detail-btn { display: flex; }
+            
+            .mobile-avatar {
+                border-radius: 16px !important;
+            }
+        }
+        
+        .mobile-detail-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            width: 48px;
+            height: 48px;
+            border-radius: 24px;
+            background: #b86b4a;
+            border: none;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            transition: 0.2s;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .mobile-detail-btn:hover {
+            background: #d47a55;
+            transform: scale(1.05);
+        }
+        
+        .mobile-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 2000;
+            display: none;
+            align-items: flex-end;
+            justify-content: center;
+            pointer-events: auto;
+        }
+        
+        .mobile-overlay.show {
+            display: flex;
+        }
+        
+        .mobile-panel {
+            width: 100%;
+            max-height: 75%;
+            background: rgba(20, 18, 35, 0.98);
+            backdrop-filter: blur(20px);
+            border-radius: 24px 24px 0 0;
+            padding: 20px;
+            overflow-y: auto;
+            animation: slideUp 0.3s ease;
+        }
+        
+        @keyframes slideUp {
+            from { transform: translateY(100%); }
+            to { transform: translateY(0); }
+        }
+        
+        .mobile-panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(255, 180, 140, 0.3);
+        }
+        
+        .mobile-panel-header h3 {
+            color: #ffdd99;
+            font-size: 18px;
+        }
+        
+        .mobile-panel-close {
+            background: none;
+            border: none;
+            color: #ffaa88;
+            font-size: 24px;
+            cursor: pointer;
+        }
+        
+        .mobile-avatar {
+            border-radius: 16px !important;
+            overflow: hidden;
+        }
+        
+        /* 筛选按钮 */
         .filter-btn {
             position: fixed;
             bottom: 20px;
@@ -67,7 +393,6 @@
             transform: scale(1.05);
         }
         
-        /* 右侧浮层面板 - 默认隐藏 */
         .float-panel {
             position: fixed;
             top: 20px;
@@ -128,6 +453,46 @@
     <canvas id="sakuraCanvas"></canvas>
     <canvas id="graphCanvas"></canvas>
     
+    <!-- 图片放大模态框 -->
+    <div class="image-modal" id="imageModal">
+        <button class="image-modal-close" id="modalCloseBtn">&times;</button>
+        <img id="modalImage" src="" alt="放大图片">
+    </div>
+    
+    <!-- 电脑端左侧详情面板 -->
+    <div class="detail-panel" id="detailPanel">
+        <div class="panel-tab" id="panelTab">
+            <i class="fas fa-chevron-left"></i>
+            <span>详 情</span>
+        </div>
+        <div class="panel-content" id="panelContent">
+            <div id="detailContent">
+                <div style="text-align: center; color: #888; padding: 40px 0;">
+                    <i class="fas fa-user-circle" style="font-size: 48px; margin-bottom: 12px; display: block;"></i>
+                    点击人物查看详情
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 手机端详情按钮 -->
+    <button class="mobile-detail-btn" id="mobileDetailBtn">
+        <i class="fas fa-info-circle"></i>
+    </button>
+    
+    <!-- 手机端浮层 -->
+    <div class="mobile-overlay" id="mobileOverlay">
+        <div class="mobile-panel">
+            <div class="mobile-panel-header">
+                <h3><i class="fas fa-user"></i> 人物详情</h3>
+                <button class="mobile-panel-close" id="mobilePanelClose">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div id="mobileDetailContent"></div>
+        </div>
+    </div>
+    
     <button class="filter-btn" id="filterToggleBtn">
         <i class="fas fa-filter"></i>
     </button>
@@ -145,35 +510,108 @@
     <div class="footer-note"><i class="fas fa-hand-pointer"></i> 点击圆点切换人物视角</div>
 
 <script>
+    // ====================== 配置 ======================
+    const DATA_URL = 'https://Vinton626.github.io/relationship/data.json';
+    const IMAGE_BASE_URL = 'https://Vinton626.github.io/relationship/img/';
+    const IMAGE_FORMATS = ['jpg', 'png', 'webp'];
+    
+    // ====================== 图片放大功能 ======================
+    const imageModal = document.getElementById('imageModal');
+    const modalImage = document.getElementById('modalImage');
+    const modalCloseBtn = document.getElementById('modalCloseBtn');
+    
+    function showImageModal(imageUrl) {
+        modalImage.src = imageUrl;
+        imageModal.classList.add('show');
+    }
+    
+    function closeImageModal() {
+        imageModal.classList.remove('show');
+        modalImage.src = '';
+    }
+    
+    modalCloseBtn.addEventListener('click', closeImageModal);
+    imageModal.addEventListener('click', function(e) {
+        if (e.target === imageModal) closeImageModal();
+    });
+    
     // ====================== 检测手机端 ======================
     function isMobile() {
         return window.innerWidth < 768;
     }
     
-    // ====================== 面板隐藏/显示 ======================
+    // ====================== 生成头像URL ======================
+    function getAvatarUrl(personId) {
+        return IMAGE_FORMATS.map(format => `${IMAGE_BASE_URL}playerid_${personId}.${format}`);
+    }
+    
+    // 加载图片，尝试多种格式
+    function loadAvatar(personId, callback) {
+        const urls = getAvatarUrl(personId);
+        let currentIndex = 0;
+        
+        function tryNext() {
+            if (currentIndex >= urls.length) {
+                callback(null);
+                return;
+            }
+            const img = new Image();
+            img.onload = () => callback(img);
+            img.onerror = () => { currentIndex++; tryNext(); };
+            img.src = urls[currentIndex];
+        }
+        tryNext();
+    }
+    
+    // ====================== 面板控制 ======================
     const filterBtn = document.getElementById('filterToggleBtn');
     const floatPanel = document.getElementById('floatPanel');
-    const panelClose = document.getElementById('panelCloseBtn');
+    const panelCloseBtn = document.getElementById('panelCloseBtn');
     
-    function togglePanel() {
-        floatPanel.classList.toggle('show');
-    }
+    function toggleFilterPanel() { floatPanel.classList.toggle('show'); }
+    function hideFilterPanel() { floatPanel.classList.remove('show'); }
     
-    function hidePanel() {
-        floatPanel.classList.remove('show');
-    }
-    
-    filterBtn.addEventListener('click', togglePanel);
-    panelClose.addEventListener('click', hidePanel);
+    filterBtn.addEventListener('click', toggleFilterPanel);
+    panelCloseBtn.addEventListener('click', hideFilterPanel);
     document.addEventListener('click', function(e) {
         if (floatPanel.classList.contains('show') && 
             !floatPanel.contains(e.target) && 
             e.target !== filterBtn && 
             !filterBtn.contains(e.target)) {
-            hidePanel();
+            hideFilterPanel();
         }
     });
-
+    
+    // 电脑端面板收起/展开
+    let isPanelCollapsed = false;
+    const detailPanel = document.getElementById('detailPanel');
+    const panelTab = document.getElementById('panelTab');
+    
+    panelTab.addEventListener('click', () => {
+        isPanelCollapsed = !isPanelCollapsed;
+        if (isPanelCollapsed) {
+            detailPanel.classList.add('collapsed');
+            panelTab.innerHTML = '<i class="fas fa-chevron-right"></i><span>详 情</span>';
+        } else {
+            detailPanel.classList.remove('collapsed');
+            panelTab.innerHTML = '<i class="fas fa-chevron-left"></i><span>详 情</span>';
+        }
+    });
+    
+    // 手机端详情面板
+    const mobileDetailBtn = document.getElementById('mobileDetailBtn');
+    const mobileOverlay = document.getElementById('mobileOverlay');
+    const mobilePanelClose = document.getElementById('mobilePanelClose');
+    
+    mobileDetailBtn.addEventListener('click', () => {
+        if (focusedPersonId) {
+            updateMobileDetail(focusedPersonId);
+            mobileOverlay.classList.add('show');
+        }
+    });
+    mobilePanelClose.addEventListener('click', () => mobileOverlay.classList.remove('show'));
+    mobileOverlay.addEventListener('click', (e) => { if (e.target === mobileOverlay) mobileOverlay.classList.remove('show'); });
+    
     // ====================== 全局变量 ======================
     let persons = [];
     let relations = [];
@@ -182,6 +620,7 @@
     const canvas = document.getElementById('graphCanvas');
     let ctx = canvas.getContext('2d');
     let floatState = new Map();
+    const avatarCache = new Map(); // 图片缓存
     
     let animationState = {
         isAnimating: false,
@@ -193,16 +632,202 @@
         currentFocus: null,
         rafId: null
     };
-
+    
+    // ====================== 更新详情面板（电脑端） ======================
+    function updateDetailPanel(personId) {
+        const person = persons.find(p => p.id === personId);
+        if (!person) return;
+        
+        // 获取相关关系
+        const relatedRels = relations.filter(r => r.sourceId === personId || r.targetId === personId);
+        const relSummary = relatedRels.map(r => {
+            const otherId = r.sourceId === personId ? r.targetId : r.sourceId;
+            const other = persons.find(p => p.id === otherId);
+            return { name: r.name, otherName: other ? other.name : '未知', direction: r.sourceId === personId ? '→' : '←' };
+        });
+        
+        const avatarHtml = `<div class="person-avatar" id="pc-avatar-${person.id}" onclick="event.stopPropagation(); showPersonImage(${person.id})">
+            <div class="avatar-placeholder">
+                <i class="fas fa-spinner fa-pulse"></i>
+                <span>加载中...</span>
+            </div>
+        </div>`;
+        
+        const relationsHtml = relSummary.length > 0 ? 
+            relSummary.map(r => `<div class="relation-item"><strong>${escapeHtml(r.name)}</strong> ${r.direction} ${escapeHtml(r.otherName)}</div>`).join('') : 
+            `<div style="text-align: center; color: #888; font-size: 12px; padding: 20px;">暂无关系记录</div>`;
+        
+        // title 和 school 字段不存在时自动显示默认值
+        const titleValue = person.title || '未设置';
+        const schoolValue = person.school || '未知门派';
+        
+        const html = `
+            ${avatarHtml}
+            <div class="info-section">
+                <div class="person-name">${escapeHtml(person.name)}</div>
+                <div class="info-row">
+                    <div class="info-label"><i class="fas fa-tag"></i> 流派</div>
+                    <div class="info-value">${escapeHtml(titleValue)}</div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label"><i class="fas fa-school"></i> 门派</div>
+                    <div class="info-value">${escapeHtml(schoolValue)}</div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label"><i class="fas fa-link"></i> 关系</div>
+                    <div class="info-value">${relatedRels.length} 条</div>
+                </div>
+                <div style="font-size: 12px; color: #ffaa88; margin: 12px 0 8px;">关系列表</div>
+                <div class="relation-list">
+                    ${relationsHtml}
+                </div>
+            </div>
+        `;
+        
+        document.getElementById('detailContent').innerHTML = html;
+        loadAndDisplayAvatar(person.id, `pc-avatar-${person.id}`);
+    }
+    
+    // 显示人物大图
+    function showPersonImage(personId) {
+        const person = persons.find(p => p.id === personId);
+        if (!person) return;
+        
+        // 先检查缓存
+        if (avatarCache.has(personId)) {
+            showImageModal(avatarCache.get(personId).src);
+        } else {
+            // 尝试加载图片
+            loadAvatar(personId, (img) => {
+                if (img) {
+                    avatarCache.set(personId, img);
+                    showImageModal(img.src);
+                } else {
+                    alert('该人物暂无图片');
+                }
+            });
+        }
+    }
+    
+    // 手机端详情更新
+    function updateMobileDetail(personId) {
+        const person = persons.find(p => p.id === personId);
+        if (!person) return;
+        
+        const relatedRels = relations.filter(r => r.sourceId === personId || r.targetId === personId);
+        const relSummary = relatedRels.map(r => {
+            const otherId = r.sourceId === personId ? r.targetId : r.sourceId;
+            const other = persons.find(p => p.id === otherId);
+            return { name: r.name, otherName: other ? other.name : '未知', direction: r.sourceId === personId ? '→' : '←' };
+        });
+        
+        const avatarHtml = `<div style="width: 100%; max-width: 200px; margin: 0 auto; border-radius: 16px; overflow: hidden; background: #2a2545; box-shadow: 0 4px 12px rgba(0,0,0,0.3);" id="mobile-avatar-${person.id}" onclick="event.stopPropagation(); showPersonImage(${person.id})">
+            <div class="avatar-placeholder" style="padding: 40px 20px;">
+                <i class="fas fa-spinner fa-pulse"></i>
+                <span>加载中...</span>
+            </div>
+        </div>`;
+        
+        const relationsHtml = relSummary.length > 0 ? 
+            relSummary.map(r => `<div style="padding: 8px 0; border-bottom: 1px solid rgba(255,180,140,0.15);"><strong style="color:#ffaa88">${escapeHtml(r.name)}</strong> ${r.direction} ${escapeHtml(r.otherName)}</div>`).join('') : 
+            '<div style="text-align: center; color: #888; padding: 20px;">暂无关系记录</div>';
+        
+        const titleValue = person.title || '未设置';
+        const schoolValue = person.school || '未知门派';
+        
+        const html = `
+            <div style="margin-bottom: 20px;">
+                ${avatarHtml}
+            </div>
+            <div style="margin-top: 16px;">
+                <div style="font-size: 20px; font-weight: bold; color: #ffdd99; text-align: center; margin-bottom: 16px;">${escapeHtml(person.name)}</div>
+            </div>
+            <div style="background: rgba(0,0,0,0.3); border-radius: 12px; padding: 12px; margin-bottom: 16px;">
+                <div style="display: flex; margin-bottom: 8px;">
+                    <div style="width: 80px; color: #ffaa88;">流派</div>
+                    <div style="flex:1; color: #f0e6d8;">${escapeHtml(titleValue)}</div>
+                </div>
+                <div style="display: flex; margin-bottom: 8px;">
+                    <div style="width: 80px; color: #ffaa88;">门派</div>
+                    <div style="flex:1; color: #f0e6d8;">${escapeHtml(schoolValue)}</div>
+                </div>
+                <div style="display: flex;">
+                    <div style="width: 80px; color: #ffaa88;">关系数</div>
+                    <div style="flex:1; color: #f0e6d8;">${relatedRels.length} 条</div>
+                </div>
+            </div>
+            <div style="font-size: 14px; color: #ffaa88; margin-bottom: 8px;">关系列表</div>
+            <div>${relationsHtml}</div>
+        `;
+        
+        document.getElementById('mobileDetailContent').innerHTML = html;
+        loadAndDisplayAvatar(person.id, `mobile-avatar-${person.id}`);
+    }
+    
+    function loadAndDisplayAvatar(personId, containerId) {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+        
+        // 检查缓存
+        if (avatarCache.has(personId)) {
+            displayAvatar(container, avatarCache.get(personId));
+            return;
+        }
+        
+        loadAvatar(personId, (img) => {
+            if (img) {
+                avatarCache.set(personId, img);
+                displayAvatar(container, img);
+            } else {
+                // 无图片时显示占位符
+                container.innerHTML = `<div class="avatar-placeholder"><i class="fas fa-image"></i><span>暂无图片</span></div>`;
+                container.style.background = '#2a2545';
+            }
+        });
+    }
+    
+    function displayAvatar(container, img) {
+        container.innerHTML = '';
+        container.style.background = 'transparent';
+        const imgElement = document.createElement('img');
+        imgElement.src = img.src;
+        imgElement.style.width = '100%';
+        imgElement.style.height = 'auto';
+        imgElement.style.minHeight = '180px';
+        imgElement.style.objectFit = 'cover';
+        imgElement.style.objectPosition = 'center top';
+        container.appendChild(imgElement);
+    }
+    
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
+    
+    // 暴露给全局
+    window.showPersonImage = showPersonImage;
+    
     // ====================== 读取数据 ======================
     async function loadData() {
         try {
-            const res = await fetch('https://Vinton626.github.io/relationship/data.json');
+            console.log('正在加载数据...', DATA_URL);
+            const res = await fetch(DATA_URL);
+            if (!res.ok) {
+                throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+            }
             const data = await res.json();
             persons = data.persons || [];
             relations = data.relations || [];
             focusedPersonId = persons.length ? persons[0].id : null;
-
+            
+            console.log(`加载成功，共 ${persons.length} 人，${relations.length} 条关系`);
+            
+            // 初始化浮动动画状态
             floatState.clear();
             persons.forEach(p => {
                 floatState.set(p.id, {
@@ -212,28 +837,44 @@
                     ampY: 1.4 + Math.random() * 1.2
                 });
             });
-
+            
+            if (focusedPersonId) {
+                updateDetailPanel(focusedPersonId);
+            }
+            
             refreshFilter();
             resizeCanvas();
             drawGraph();
         } catch (err) {
             console.error("加载失败：", err);
-            alert("请检查 data.json 文件路径");
+            const w = canvas.width, h = canvas.height;
+            ctx.font = "16px Inter";
+            ctx.fillStyle = "#ff8888";
+            ctx.textAlign = "center";
+            ctx.fillText("数据加载失败: " + err.message, w / 2, h / 2);
+            ctx.fillText("请检查 data.json 路径是否正确", w / 2, h / 2 + 30);
+            ctx.textAlign = "left";
         }
     }
-
+    
+    function setFocusedPersonAndUpdate(personId) {
+        focusedPersonId = personId;
+        if (!isMobile()) {
+            updateDetailPanel(personId);
+        }
+        drawGraph();
+    }
+    
+    // ====================== 动画和绘图函数 ======================
     function easeOutCubic(t) { return 1 - Math.pow(1 - t, 3); }
-
-    // ====================== 聚焦动画 ======================
+    
     function animateFocusChange(newFocusId) {
         if (animationState.isAnimating || !persons.length || newFocusId === focusedPersonId) return;
-        
         if (animationState.rafId) cancelAnimationFrame(animationState.rafId);
         
         const currentFocus = focusedPersonId || persons[0].id;
         const currentPos = computePositions(currentFocus);
         const targetPos = computePositions(newFocusId);
-        
         if (currentPos.size === 0 || targetPos.size === 0) return;
         
         animationState.isAnimating = true;
@@ -241,50 +882,39 @@
         animationState.currentFocus = newFocusId;
         animationState.startPos.clear();
         animationState.targetPos.clear();
-        
         for (const [id, pos] of currentPos) animationState.startPos.set(id, { x: pos.x, y: pos.y });
         for (const [id, pos] of targetPos) animationState.targetPos.set(id, { x: pos.x, y: pos.y });
         
         function animateStep(timestamp) {
             if (!animationState.isAnimating) return;
-            
             const elapsed = timestamp - animationState.startTime;
             let progress = Math.min(elapsed / animationState.duration, 1);
             const eased = easeOutCubic(progress);
-            
             const currentFramePos = new Map();
             const now = performance.now();
-            
             for (const [id, start] of animationState.startPos) {
                 const target = animationState.targetPos.get(id);
-                if (!target) {
-                    currentFramePos.set(id, { x: start.x, y: start.y });
-                    continue;
-                }
+                if (!target) { currentFramePos.set(id, { x: start.x, y: start.y }); continue; }
                 let x = start.x + (target.x - start.x) * eased;
                 let y = start.y + (target.y - start.y) * eased;
                 const floatOffset = getFloatOffset(id, id === animationState.currentFocus, now);
                 currentFramePos.set(id, { x: x + floatOffset.x, y: y + floatOffset.y });
             }
-            
             drawAnimatedFrame(currentFramePos, animationState.currentFocus);
-            
             if (progress >= 1) {
                 animationState.isAnimating = false;
-                focusedPersonId = animationState.currentFocus;
+                setFocusedPersonAndUpdate(animationState.currentFocus);
                 animationState.rafId = null;
                 drawGraph();
             } else {
                 animationState.rafId = requestAnimationFrame(animateStep);
             }
         }
-        
         animationState.rafId = requestAnimationFrame(animateStep);
     }
-
+    
     function drawAnimatedFrame(posMap, focusId) {
         if (!persons.length) return;
-        
         const w = canvas.width, h = canvas.height;
         ctx.clearRect(0, 0, w, h);
         
@@ -296,14 +926,12 @@
             const sourcePos = posMap.get(r.sourceId);
             const targetPos = posMap.get(r.targetId);
             if (!sourcePos || !targetPos) return;
-            
             const relLayout = relOffsetMap.get(r.id) || { curve: 10, shift: 0 };
             const offset = relLayout.curve;
             const isFocusSource = r.sourceId === focusId;
             const isFocusTarget = r.targetId === focusId;
             const lineColor = (isFocusSource || isFocusTarget) ? "#ffcc99" : "#6a5a4e";
             const lineWidth = (isFocusSource || isFocusTarget) ? (isMobile() ? 2.5 : 3) : (isMobile() ? 1.2 : 1.8);
-            
             drawCurve(ctx, sourcePos.x, sourcePos.y, targetPos.x, targetPos.y, offset, lineColor, lineWidth);
             drawArrowAtEnd(ctx, sourcePos.x, sourcePos.y, targetPos.x, targetPos.y, offset, lineColor);
         });
@@ -314,10 +942,9 @@
             if (!sourcePos || !targetPos || !r.name) return;
             const relLayout = relOffsetMap.get(r.id) || { curve: 10, shift: 0 };
             const offset = relLayout.curve;
-            const isFocusSource = r.sourceId === focusId;
-            const isFocusTarget = r.targetId === focusId;
-            const textColor = (isFocusSource || isFocusTarget) ? "#ffdd99" : "#ccaa88";
-            drawRelationName(ctx, r.name, sourcePos.x, sourcePos.y, targetPos.x, targetPos.y, offset, textColor, relLayout.shift);
+            const sh = relLayout.shift;
+            const col = (r.sourceId === focusId || r.targetId === focusId) ? "#ffdd99" : "#ccaa88";
+            drawRelationName(ctx, r.name, sourcePos.x, sourcePos.y, targetPos.x, targetPos.y, offset, col, sh);
         });
         
         posMap.forEach((pos, personId) => {
@@ -325,14 +952,11 @@
             if (!person) return;
             const isFocus = personId === focusId;
             const radius = getNodeRadius(isFocus, persons.length);
-            
             ctx.shadowBlur = isFocus ? (isMobile() ? 10 : 16) : (isMobile() ? 4 : 8);
             ctx.shadowColor = `${person.color}80`;
-            
             const grad = ctx.createRadialGradient(pos.x - 6, pos.y - 6, 4, pos.x, pos.y, radius);
             grad.addColorStop(0, person.color);
             grad.addColorStop(1, "#2a2340");
-            
             ctx.beginPath();
             ctx.arc(pos.x, pos.y, radius, 0, Math.PI * 2);
             ctx.fillStyle = grad;
@@ -340,8 +964,6 @@
             ctx.strokeStyle = isFocus ? "#ffdd99" : "#bb9977";
             ctx.lineWidth = isFocus ? (isMobile() ? 2 : 2.5) : (isMobile() ? 1.2 : 1.8);
             ctx.stroke();
-            
-            // 手机端字号调大
             const fontSize = isFocus ? (isMobile() ? 15 : 16) : (isMobile() ? 12 : 13);
             ctx.font = `bold ${fontSize}px "Inter", sans-serif`;
             ctx.fillStyle = "#fff5ea";
@@ -350,44 +972,30 @@
             const maxLen = isMobile() ? 5 : 6;
             const displayName = person.name.length > maxLen ? person.name.slice(0, maxLen) + "…" : person.name;
             ctx.fillText(displayName, pos.x, pos.y + (isMobile() ? 4 : 5));
-            
             if (isFocus) {
                 ctx.font = `${isMobile() ? 12 : 14}px "Font Awesome 6 Free", sans-serif`;
                 ctx.fillStyle = "#ffdd99";
                 ctx.fillText("\uf005", pos.x + (isMobile() ? 16 : 20), pos.y - (isMobile() ? 9 : 12));
             }
-            
             ctx.textAlign = "left";
             ctx.textShadow = "none";
         });
-        
         ctx.shadowBlur = 0;
     }
-
-    // ====================== 核心布局函数 ======================
-    function getSourceName(id) { const p = persons.find(x => x.id === id); return p ? p.name : "未知"; }
+    
     function getPersonVisibleRelations(pid) { return relations.filter(r => r.sourceId === pid); }
     
-    // 节点大小：手机端稍微调大，电脑端恢复原来大小
     function getNodeRadius(isFocus, total) {
         const mobile = isMobile();
-        if (mobile) {
-            // 手机端：在现有基础上调大2-3px
-            if (isFocus) return Math.max(15, 21 - Math.floor(total / 12));
-            return Math.max(10, 15 - Math.floor(total / 14));
-        } else {
-            // 电脑端：恢复原来的大小
-            if (isFocus) return Math.max(22, 30 - Math.floor(total / 8));
-            return Math.max(14, 22 - Math.floor(total / 10));
-        }
+        if (mobile) return isFocus ? Math.max(15, 21 - Math.floor(total / 12)) : Math.max(10, 15 - Math.floor(total / 14));
+        else return isFocus ? Math.max(22, 30 - Math.floor(total / 8)) : Math.max(14, 22 - Math.floor(total / 10));
     }
-
+    
     function relaxPositions(posMap, focusId, w, h, total) {
         const ids = [...posMap.keys()].filter(i => i !== focusId);
         if (ids.length < 2) return posMap;
         const mobile = isMobile();
         const minDist = getNodeRadius(false, total) * 2 + (mobile ? 8 : 12);
-        
         for (let k = 0; k < 12; k++) {
             for (let i = 0; i < ids.length; i++) {
                 for (let j = i + 1; j < ids.length; j++) {
@@ -413,33 +1021,20 @@
         }
         return posMap;
     }
-
+    
     function computePositions(focusId) {
         const m = new Map();
         const w = canvas.width, h = canvas.height;
         if (!persons.length) return m;
-        
         const f = persons.some(p => p.id === focusId) ? focusId : persons[0].id;
         m.set(f, { x: w / 2, y: h / 2 });
-        
         const others = persons.filter(p => p.id !== f);
         const cnt = others.length;
         if (!cnt) return m;
-        
         const mobile = isMobile();
         const baseRadius = Math.min(w, h);
-        
-        let r1, r2;
-        if (mobile) {
-            // 手机端：半径加大，让人物散开
-            r1 = baseRadius * 0.40;
-            r2 = baseRadius * 0.54;
-        } else {
-            // 电脑端：正常半径
-            r1 = baseRadius * 0.28;
-            r2 = baseRadius * 0.40;
-        }
-        
+        let r1 = mobile ? baseRadius * 0.40 : baseRadius * 0.28;
+        let r2 = mobile ? baseRadius * 0.54 : baseRadius * 0.40;
         const cap = Math.min(12, cnt);
         others.forEach((p, i) => {
             const ring1 = i < cap;
@@ -447,7 +1042,6 @@
             const ringCount = ring1 ? cap : cnt - cap;
             const step = ringCount > 0 ? Math.PI * 2 / ringCount : 0;
             const ang = -Math.PI / 2 + (ring1 ? i : i - cap) * step;
-            
             let x = w / 2 + Math.cos(ang) * r;
             let y = h / 2 + Math.sin(ang) * r;
             const margin = mobile ? 40 : 60;
@@ -455,10 +1049,9 @@
             y = Math.min(h - margin, Math.max(margin, y));
             m.set(p.id, { x, y });
         });
-        
         return relaxPositions(m, f, w, h, persons.length);
     }
-
+    
     function getFloatOffset(pid, isFocus, now) {
         const f = floatState.get(pid);
         if (!f) return { x: 0, y: 0 };
@@ -466,12 +1059,9 @@
         const s = isFocus ? 0.6 : 1;
         const mobile = isMobile();
         const ampScale = mobile ? 0.7 : 1;
-        return {
-            x: Math.sin(t) * f.ampX * s * ampScale,
-            y: Math.cos(t * 1.13) * f.ampY * s * ampScale
-        };
+        return { x: Math.sin(t) * f.ampX * s * ampScale, y: Math.cos(t * 1.13) * f.ampY * s * ampScale };
     }
-
+    
     function applyFloat(base, focus, now) {
         const m = new Map();
         base.forEach((pos, id) => {
@@ -480,7 +1070,7 @@
         });
         return m;
     }
-
+    
     function buildOffsetMap(rels) {
         const map = new Map();
         const groups = new Map();
@@ -500,7 +1090,7 @@
         });
         return map;
     }
-
+    
     function drawCurve(ctx, fx, fy, tx, ty, off, c, w) {
         const dx = tx - fx, dy = ty - fy, d = Math.hypot(dx, dy);
         if (d < 1) return;
@@ -513,7 +1103,7 @@
         ctx.lineCap = 'round';
         ctx.stroke();
     }
-
+    
     function drawArrowAtEnd(ctx, fx, fy, tx, ty, off, c) {
         const dx = tx - fx, dy = ty - fy, d = Math.hypot(dx, dy);
         if (d < 1) return;
@@ -533,7 +1123,7 @@
         ctx.fill();
         ctx.restore();
     }
-
+    
     function drawRelationName(ctx, t, fx, fy, tx, ty, off, c, shift = 0) {
         const dx = tx - fx, dy = ty - fy, d = Math.hypot(dx, dy);
         if (d < 1 || !t) return;
@@ -547,14 +1137,20 @@
         const bgHeight = isMobile() ? 16 : 18;
         ctx.fillStyle = "rgba(0,0,0,0.65)";
         ctx.beginPath();
-        ctx.roundRect(mx - w / 2 - padding, my - bgHeight / 2, w + padding * 2, bgHeight, bgHeight / 2);
+        if (!CanvasRenderingContext2D.prototype.roundRect) {
+            ctx.fillRect(mx - w / 2 - padding, my - bgHeight / 2, w + padding * 2, bgHeight);
+        } else {
+            ctx.roundRect(mx - w / 2 - padding, my - bgHeight / 2, w + padding * 2, bgHeight, bgHeight / 2);
+            ctx.fill();
+        }
         ctx.fill();
         ctx.fillStyle = c;
         ctx.textAlign = "center";
         ctx.fillText(t, mx, my + 4);
         ctx.textAlign = "left";
     }
-
+    
+    // 添加 roundRect 方法
     if (!CanvasRenderingContext2D.prototype.roundRect) {
         CanvasRenderingContext2D.prototype.roundRect = function(x, y, w, h, r) {
             r = Math.min(r, w / 2, h / 2);
@@ -570,10 +1166,9 @@
             return this;
         };
     }
-
+    
     function drawGraph() {
         if (animationState.isAnimating) return;
-        
         const w = canvas.width, h = canvas.height;
         ctx.clearRect(0, 0, w, h);
         if (!persons.length) {
@@ -584,7 +1179,6 @@
             ctx.textAlign = "left";
             return;
         }
-        
         const f = focusedPersonId || persons[0].id;
         const base = computePositions(f);
         const disp = applyFloat(base, f, performance.now());
@@ -618,11 +1212,9 @@
             const r = getNodeRadius(isF, persons.length);
             ctx.shadowBlur = isF ? (isMobile() ? 10 : 16) : (isMobile() ? 4 : 8);
             ctx.shadowColor = p.color + "80";
-            
             const grad = ctx.createRadialGradient(pos.x - 6, pos.y - 6, 4, pos.x, pos.y, r);
             grad.addColorStop(0, p.color);
             grad.addColorStop(1, "#2a2340");
-            
             ctx.beginPath();
             ctx.arc(pos.x, pos.y, r, 0, Math.PI * 2);
             ctx.fillStyle = grad;
@@ -630,8 +1222,6 @@
             ctx.strokeStyle = isF ? "#ffdd99" : "#bb9977";
             ctx.lineWidth = isF ? (isMobile() ? 2 : 2.5) : (isMobile() ? 1.2 : 1.8);
             ctx.stroke();
-            
-            // 手机端字号调大
             const fontSize = isF ? (isMobile() ? 15 : 16) : (isMobile() ? 12 : 13);
             ctx.font = `bold ${fontSize}px Inter`;
             ctx.fillStyle = "#fff5ea";
@@ -640,66 +1230,45 @@
             const maxLen = isMobile() ? 5 : 6;
             const n = p.name.length > maxLen ? p.name.slice(0, maxLen) + "…" : p.name;
             ctx.fillText(n, pos.x, pos.y + (isMobile() ? 4 : 5));
-            
             if (isF) {
                 ctx.font = `${isMobile() ? 12 : 14}px "Font Awesome 6 Free"`;
                 ctx.fillStyle = "#ffdd99";
                 ctx.fillText("\uf005", pos.x + (isMobile() ? 16 : 20), pos.y - (isMobile() ? 9 : 12));
             }
-            
             ctx.textAlign = "left";
             ctx.textShadow = "none";
         });
-        
         ctx.shadowBlur = 0;
     }
-
+    
     function onClick(e) {
         if (persons.length === 0 || animationState.isAnimating) return;
-        
         const rect = canvas.getBoundingClientRect();
         const scaleX = canvas.width / rect.width;
         const scaleY = canvas.height / rect.height;
         const x = (e.clientX - rect.left) * scaleX;
         const y = (e.clientY - rect.top) * scaleY;
-        
         const f = focusedPersonId || persons[0].id;
         const base = computePositions(f);
         const disp = applyFloat(base, f, performance.now());
-        
         let target = null;
         disp.forEach((pos, id) => {
             const rr = getNodeRadius(id === f, persons.length);
             if (Math.hypot(x - pos.x, y - pos.y) <= rr + 8) target = id;
         });
-        
-        if (target && target !== focusedPersonId) {
-            animateFocusChange(target);
-        }
+        if (target && target !== focusedPersonId) animateFocusChange(target);
     }
-
+    
     function refreshFilter() {
         const box = document.getElementById("filterTags");
         const uniq = [...new Set(relations.map(r => r.name).filter(Boolean))];
-        if (!uniq.length) {
-            box.innerHTML = "<span style='font-size:12px;opacity:0.6'>暂无关系</span>";
-            return;
-        }
-        box.innerHTML = uniq.map(n => `<div class="filter-tag ${activeFilter === n ? 'active' : ''}" onclick="setFilter('${n.replace(/'/g, "\\'")}')">${n}</div>`).join("");
+        if (!uniq.length) { box.innerHTML = "<span style='font-size:12px;opacity:0.6'>暂无关系</span>"; return; }
+        box.innerHTML = uniq.map(n => `<div class="filter-tag ${activeFilter === n ? 'active' : ''}" onclick="setFilter('${n.replace(/'/g, "\\'")}')">${escapeHtml(n)}</div>`).join("");
     }
     
-    function setFilter(n) {
-        activeFilter = activeFilter === n ? null : n;
-        refreshFilter();
-        drawGraph();
-    }
+    function setFilter(n) { activeFilter = activeFilter === n ? null : n; refreshFilter(); drawGraph(); }
+    function clearFilter() { activeFilter = null; refreshFilter(); drawGraph(); }
     
-    function clearFilter() {
-        activeFilter = null;
-        refreshFilter();
-        drawGraph();
-    }
-
     // 樱花特效
     const sCanvas = document.getElementById("sakuraCanvas");
     let sCtx = sCanvas.getContext("2d");
@@ -757,18 +1326,19 @@
         sCanvas.width = innerWidth;
         sCanvas.height = innerHeight;
         petals = Array.from({ length: 70 }, () => new Petal());
-        (function loop() {
+        function loop() {
             sCtx.clearRect(0, 0, sCanvas.width, sCanvas.height);
             petals.forEach(p => { p.update(); p.draw(sCtx); });
             requestAnimationFrame(loop);
-        })();
+        }
+        loop();
     }
     
     window.addEventListener("resize", () => {
         sCanvas.width = innerWidth;
         sCanvas.height = innerHeight;
     });
-
+    
     window.setFilter = setFilter;
     window.clearFilter = clearFilter;
     
