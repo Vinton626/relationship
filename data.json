@@ -691,6 +691,18 @@
       "sourceId": 20,
       "targetId": 3,
       "name": "师父"
+    },
+    {
+      "id": 122,
+      "sourceId": 16,
+      "targetId": 20,
+      "name": "二师妹"
+    },
+    {
+      "id": 123,
+      "sourceId": 20,
+      "targetId": 16,
+      "name": "大师兄"
     }
   ]
 }
