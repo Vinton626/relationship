@@ -4,16 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>共用关系图</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'Inter', sans-serif;
             min-height: 100vh;
             background: linear-gradient(145deg, #1a1a2e 0%, #0d0d1a 100%);
-            overflow-x: auto;
-            padding: 20px;
+            overflow-x: hidden;
             position: relative;
         }
         #sakuraCanvas {
@@ -25,881 +24,279 @@
             pointer-events: none;
             z-index: 1;
         }
-        .main {
-            position: relative;
-            z-index: 10;
-            max-width: 1500px;
-            margin: 0 auto;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 20px;
-        }
-        .graph-area {
-            flex: 3;
-            min-width: 300px;
-            background: rgba(0, 0, 0, 0.35);
-            backdrop-filter: blur(4px);
-            border-radius: 28px;
-            padding: 16px;
-            border: 1px solid rgba(255, 200, 180, 0.3);
-        }
-        canvas {
+        #graphCanvas {
             display: block;
-            width: 100%;
-            height: auto;
+            width: 100vw;
+            height: 100vh;
             background: rgba(25, 22, 40, 0.6);
-            border-radius: 20px;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.4);
             cursor: pointer;
         }
-        .sidebar {
-            flex: 1.2;
-            min-width: 280px;
+        .float-panel {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 999;
+            width: 280px;
+            max-height: calc(100vh - 40px);
             background: rgba(20, 18, 35, 0.85);
             backdrop-filter: blur(12px);
-            border-radius: 28px;
-            padding: 20px;
+            border-radius: 20px;
+            padding: 16px;
             border: 1px solid rgba(255, 180, 150, 0.4);
             color: #f0e6d8;
-            display: flex;
-            flex-direction: column;
-            gap: 18px;
-        }
-        .section { border-bottom: 1px solid rgba(255, 180, 140, 0.3); padding-bottom: 12px; }
-        .section-title { font-size: 1rem; font-weight: 600; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
-        .list {
-            background: #0c0a1a80;
-            border-radius: 20px;
-            padding: 8px;
-            max-height: 200px;
             overflow-y: auto;
         }
-        .list-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: #2a2545;
-            margin: 5px 0;
-            padding: 8px 12px;
-            border-radius: 40px;
-            font-size: 0.85rem;
+        @media (max-width: 768px) {
+            .float-panel {
+                width: calc(100vw - 40px);
+                bottom: 20px;
+                top: auto;
+                left: 20px;
+                right: 20px;
+                max-height: 50vh;
+            }
         }
-        .item-name { cursor: pointer; font-weight: 500; padding: 4px 8px; border-radius: 30px; }
-        .del-btn {
-            background: #5a2a2a;
-            border: none;
-            color: #ffaa88;
-            cursor: pointer;
-            padding: 6px 14px;
-            border-radius: 30px;
-            font-size: 0.75rem;
-            transition: 0.2s;
+        .section {
+            margin-bottom: 12px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(255, 180, 140, 0.2);
         }
-        .del-btn:hover { background: #8a3a3a; color: white; }
-        .form-row { display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px; }
-        input, select, button {
-            background: #1e1a32;
-            border: 1px solid #aa7a60;
-            padding: 10px 14px;
-            border-radius: 40px;
-            color: #f0e6d8;
-            font-size: 0.85rem;
-            outline: none;
-        }
-        button { cursor: pointer; transition: 0.2s; }
-        .btn-primary { background: #b86b4a; border-color: #ffccaa; }
-        .btn-primary:hover { background: #d47a55; }
-        .badge { font-size: 0.7rem; background: #00000066; padding: 6px 10px; border-radius: 20px; text-align: center; }
-        .footer-note { font-size: 0.7rem; text-align: center; margin-top: 10px; opacity: 0.6; }
-        .filter-group { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
-        .filter-tag {
-            background: #2a2545;
-            padding: 6px 14px;
-            border-radius: 30px;
-            font-size: 0.8rem;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-        .filter-tag.active { background: #b86b4a; color: white; }
+        .section:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+        .section-title { font-size: 0.95rem; font-weight: 600; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+        .filter-group { display: flex; flex-wrap: wrap; gap: 6px; }
+        .filter-tag { background: #2a2545; padding: 5px 12px; border-radius: 30px; font-size: 0.75rem; cursor: pointer; transition: 0.2s; white-space: nowrap; }
+        .filter-tag.active { background: #b86b4a; color: #fff; }
         .filter-tag:hover { background: #d47a55; }
-        .clear-filter { background: none; border: 1px solid #aa7a60; padding: 6px 14px; font-size: 0.8rem; }
-        .sync-status {
-            font-size: 0.7rem;
-            padding: 6px 12px;
-            background: rgba(0,0,0,0.5);
-            border-radius: 20px;
-            text-align: center;
-        }
-        .sync-status.synced { color: #88ffaa; }
-        .sync-status.saving { color: #ffaa88; }
-        .sync-status.error { color: #ff8888; }
-        /* 隐藏无用按钮 */
-        .file-row{display:none;}
+        .clear-btn { background: #1e1a32; border: 1px solid #aa7a60; color: #f0e6d8; padding: 6px 12px; border-radius: 30px; font-size: 0.75rem; cursor: pointer; margin-top: 8px; width: 100%; }
+        .footer-note { position: fixed; bottom: 12px; left: 50%; transform: translateX(-50%); color: rgba(255,255,255,0.5); font-size: 0.75rem; z-index: 10; white-space: nowrap; pointer-events: none; }
     </style>
 </head>
 <body>
 <canvas id="sakuraCanvas"></canvas>
-<div class="main">
-    <div class="graph-area">
-        <canvas id="graphCanvas" width="900" height="600" style="width:100%; height:auto; aspect-ratio:900/600"></canvas>
-        <div class="footer-note">
-            <i class="fas fa-hand-pointer"></i> 点击圆点切换人物视角 | 全员共用同一张关系图
-        </div>
-    </div>
-    <div class="sidebar">
-        <div class="sync-status" id="syncStatus">⚡ 加载公共数据中...</div>
-        
-        <div class="section">
-            <div class="section-title"><i class="fas fa-user-circle"></i> 人物</div>
-            <div id="peopleList" class="list"></div>
-            <div class="form-row" style="margin-top:10px">
-                <input type="text" id="newName" placeholder="名称" maxlength="12">
-                <input type="text" id="newTitle" placeholder="描述/称号" value="">
-                <input type="color" id="newColor" value="#d9a7c7">
-                <button id="addPersonBtn" class="btn-primary"><i class="fas fa-plus"></i> 添加人物</button>
-            </div>
-        </div>
-        <div class="section">
-            <div class="section-title"><i class="fas fa-link"></i> 添加关系</div>
-            <div class="form-row">
-                <select id="selectA"><option value="">— 选择人物A —</option></select>
-                <select id="selectB"><option value="">— 选择人物B —</option></select>
-                <div style="display: flex; gap: 15px; margin: 5px 0;">
-                    <label><input type="radio" name="relationDir" value="directional" checked> 单向 (A→B)</label>
-                    <label><input type="radio" name="relationDir" value="bidirectional"> 双向关系</label>
-                </div>
-                <input type="text" id="relationName" placeholder="关系名称 (如: 师父、徒弟、挚友)" maxlength="20">
-                <button id="addRelationBtn" class="btn-primary"><i class="fas-handshake"></i> 添加关系</button>
-            </div>
-            <div class="badge">💡 双向关系会自动拆分为两个单向关系</div>
-        </div>
-        <div class="section">
-            <div class="section-title"><i class="fas fa-filter"></i> 关系筛选</div>
-            <div id="filterTags" class="filter-group"></div>
-            <button id="clearFilterBtn" class="clear-filter" style="margin-top:8px; width:100%"><i class="fas fa-times"></i> 清除筛选</button>
-        </div>
-        <div class="section">
-            <div class="section-title"><i class="fas fa-list"></i> 关系列表</div>
-            <div id="relationList" class="list" style="max-height:150px"></div>
-        </div>
+<canvas id="graphCanvas"></canvas>
+
+<div class="float-panel">
+    <div class="section">
+        <div class="section-title"><i class="fas fa-filter"></i> 关系筛选</div>
+        <div id="filterTags" class="filter-group"></div>
+        <button id="clearFilterBtn" class="clear-btn">清除筛选</button>
     </div>
 </div>
+<div class="footer-note"><i class="fas fa-hand-pointer"></i> 点击圆点切换人物视角</div>
 
 <script>
-    // ========== 免费公共云存储｜全局共用一张图 无需后端 ==========
-    const DATA_BIN_URL = "https://api.jsonbin.io/v3/b/674c8991ad19ca34f8b7c883";
-    const DATA_BIN_KEY = "$2a$10$FreeDemoKey1234567890abcdefgh";
-
-    // ========== 全局数据 ==========
+    // ====================== 全局变量 ======================
     let persons = [];
     let relations = [];
-    let nextPersonId = 1;
-    let nextRelationId = 1;
     let focusedPersonId = null;
     let activeFilter = null;
-    let isSaving = false;
-
-    // 动画相关
-    let animationState = {
-        isAnimating: false,
-        startPos: new Map(),
-        targetPos: new Map(),
-        progress: 0,
-        duration: 500,
-        startTime: 0,
-        currentFocus: null
-    };
-    let floatState = new Map();
-
     const canvas = document.getElementById('graphCanvas');
     let ctx = canvas.getContext('2d');
+    let floatState = new Map();
 
-    // ========== 免费云端同步（多人共用）==========
-    async function syncToCloud() {
-        if (isSaving) return;
-        isSaving = true;
-        const statusEl = document.getElementById('syncStatus');
-        statusEl.innerHTML = '💾 保存公共数据...';
-        statusEl.className = 'sync-status saving';
-
+    // ====================== 从 GitPages 读取静态 JSON ======================
+    async function loadData() {
         try {
-            const payload = { persons, relations, nextPersonId, nextRelationId };
-            await fetch(DATA_BIN_URL, {
-                method: "PUT",
-                headers: {
-                    "Content-Type": "application/json",
-                    "X-Master-Key": DATA_BIN_KEY
-                },
-                body: JSON.stringify(payload)
+            const res = await fetch('./data.json');
+            const data = await res.json();
+            persons = data.persons || [];
+            relations = data.relations || [];
+            focusedPersonId = persons.length ? persons[0].id : null;
+
+            // 初始化浮动动画
+            floatState.clear();
+            persons.forEach(p => {
+                floatState.set(p.id, {
+                    phase: Math.random() * Math.PI * 2,
+                    speed: 0.0012 + Math.random() * 0.001,
+                    ampX: 1.8 + Math.random() * 1.6,
+                    ampY: 2.0 + Math.random() * 1.8
+                });
             });
-            statusEl.innerHTML = '✅ 全员已同步';
-            statusEl.className = 'sync-status synced';
-            setTimeout(() => {
-                if (statusEl.innerHTML === '✅ 全员已同步') {
-                    statusEl.innerHTML = '☁️ 公共数据正常';
-                }
-            }, 2000);
+
+            refreshFilter();
+            resizeCanvas();
+            drawGraph();
         } catch (err) {
-            console.error('同步失败:', err);
-            statusEl.innerHTML = '❌ 同步失败';
-            statusEl.className = 'sync-status error';
-        } finally {
-            isSaving = false;
+            console.error("加载 data.json 失败：", err);
+            alert("请确保 data.json 文件与 index.html 放在同一目录");
         }
     }
 
-    async function loadFromCloud() {
-        const statusEl = document.getElementById('syncStatus');
-        statusEl.innerHTML = '📡 读取公共数据...';
-        statusEl.className = 'sync-status saving';
+    // ====================== 绘图逻辑（完整保留）======================
+    function getSourceName(id) { const p = persons.find(x => x.id === id); return p ? p.name : "未知"; }
+    function getPersonVisibleRelations(pid) { return relations.filter(r => r.sourceId === pid); }
+    function getNodeRadius(isFocus, total) { return isFocus ? Math.max(30, 38 - Math.floor(total/8)) : Math.max(20, 28 - Math.floor(total/10)); }
 
-        try {
-            const res = await fetch(DATA_BIN_URL);
-            const json = await res.json();
-            const data = json.record;
-
-            if (data) {
-                persons = data.persons || [];
-                relations = data.relations || [];
-                nextPersonId = data.nextPersonId || 1;
-                nextRelationId = data.nextRelationId || 1;
-
-                persons.forEach(p => {
-                    if (!floatState.has(p.id)) {
-                        floatState.set(p.id, {
-                            phase: Math.random() * Math.PI * 2,
-                            speed: 0.0012 + Math.random() * 0.001,
-                            ampX: 1.8 + Math.random() * 1.6,
-                            ampY: 2.0 + Math.random() * 1.8
-                        });
-                    }
-                });
-
-                focusedPersonId = persons.length > 0 ? persons[0].id : null;
-                statusEl.innerHTML = '✅ 读取成功';
-                statusEl.className = 'sync-status synced';
-                setTimeout(() => {
-                    statusEl.innerHTML = '☁️ 公共数据正常';
-                }, 2000);
-                refreshUI();
-                drawGraph();
-                return;
-            }
-        } catch (err) {
-            console.error('加载失败:', err);
-            statusEl.innerHTML = '⚠️ 加载失败';
-            statusEl.className = 'sync-status error';
-        }
-        refreshUI();
-        drawGraph();
-    }
-
-    // 带自动同步的修改函数
-    async function modifyAndSync(modifyFn) {
-        modifyFn();
-        refreshUI();
-        drawGraph();
-        await syncToCloud();
-    }
-
-    // ========== 核心业务函数 ==========
-    function addPerson(name, title, color) {
-        if (!name || name.trim() === "") {
-            alert("请输入有效的人物名称");
-            return false;
-        }
-        const newPerson = {
-            id: nextPersonId++,
-            name: name.trim(),
-            title: title || "",
-            color: color || "#c9a9e0"
-        };
-        persons.push(newPerson);
-        floatState.set(newPerson.id, {
-            phase: Math.random() * Math.PI * 2,
-            speed: 0.0012 + Math.random() * 0.001,
-            ampX: 1.8 + Math.random() * 1.6,
-            ampY: 2.0 + Math.random() * 1.8
-        });
-        if (persons.length === 1) focusedPersonId = newPerson.id;
-        return true;
-    }
-
-    function addRelation(sourceId, targetId, isBidirectional, relationName) {
-        if (sourceId === targetId) {
-            alert("不能与自己建立关系");
-            return false;
-        }
-        if (!relationName || relationName.trim() === "") {
-            alert("请输入关系名称");
-            return false;
-        }
-        relationName = relationName.trim();
-
-        const isDuplicateSingle = relations.some(r =>
-            r.sourceId === sourceId && r.targetId === targetId && r.name === relationName
-        );
-        if (isDuplicateSingle) {
-            alert(`已存在 ${getSourceName(sourceId)} → ${getSourceName(targetId)} [${relationName}] 关系`);
-            return false;
-        }
-
-        relations.push({
-            id: nextRelationId++,
-            sourceId: sourceId,
-            targetId: targetId,
-            name: relationName
-        });
-
-        if (isBidirectional) {
-            const isDuplicateReverse = relations.some(r =>
-                r.sourceId === targetId && r.targetId === sourceId && r.name === relationName
-            );
-            if (!isDuplicateReverse) {
-                relations.push({
-                    id: nextRelationId++,
-                    sourceId: targetId,
-                    targetId: sourceId,
-                    name: relationName
-                });
-            }
-        }
-        return true;
-    }
-
-    function deletePersonById(personId) {
-        persons = persons.filter(p => p.id !== personId);
-        relations = relations.filter(r => r.sourceId !== personId && r.targetId !== personId);
-        floatState.delete(personId);
-        if (focusedPersonId === personId) {
-            focusedPersonId = persons.length > 0 ? persons[0].id : null;
-        }
-    }
-
-    function deleteRelationById(relationId) {
-        relations = relations.filter(r => r.id !== relationId);
-    }
-
-    // 包装异步函数
-    async function handleAddPerson() {
-        const name = document.getElementById('newName').value;
-        const title = document.getElementById('newTitle').value;
-        const color = document.getElementById('newColor').value;
-        if (addPerson(name, title, color)) {
-            document.getElementById('newName').value = '';
-            document.getElementById('newTitle').value = '';
-            document.getElementById('newName').focus();
-            await syncToCloud();
-            refreshUI();
-            drawGraph();
-        }
-    }
-
-    async function handleAddRelation() {
-        const sourceId = parseInt(document.getElementById('selectA').value);
-        const targetId = parseInt(document.getElementById('selectB').value);
-        const isBidirectional = document.querySelector('input[name="relationDir"]:checked').value === 'bidirectional';
-        const relationName = document.getElementById('relationName').value;
-
-        if (isNaN(sourceId) || isNaN(targetId)) {
-            alert("请选择两个不同的人物");
-            return;
-        }
-
-        if (addRelation(sourceId, targetId, isBidirectional, relationName)) {
-            document.getElementById('relationName').value = '';
-            document.getElementById('selectA').value = '';
-            document.getElementById('selectB').value = '';
-            await syncToCloud();
-            refreshUI();
-            drawGraph();
-        }
-    }
-
-    async function handleDeletePerson(personId) {
-        if (confirm('确定删除这个人吗？所有相关关系也会被删除。')) {
-            deletePersonById(personId);
-            await syncToCloud();
-            refreshUI();
-            drawGraph();
-        }
-    }
-
-    async function handleDeleteRelation(relationId) {
-        if (confirm('确定删除这个关系吗？')) {
-            deleteRelationById(relationId);
-            await syncToCloud();
-            refreshUI();
-            drawGraph();
-        }
-    }
-
-    // ========== 原有绘图和UI函数（无修改）==========
-    function getSourceName(id) {
-        const person = persons.find(p => p.id === id);
-        return person ? person.name : "未知人物";
-    }
-
-    function getPersonVisibleRelations(personId) {
-        return relations.filter(r => r.sourceId === personId);
-    }
-
-    function getNodeRadius(isFocus, totalCount) {
-        if (isFocus) return Math.max(30, 38 - Math.floor(totalCount / 8));
-        return Math.max(20, 28 - Math.floor(totalCount / 10));
-    }
-
-    function relaxPositions(posMap, focusId, w, h, totalCount) {
-        const ids = [...posMap.keys()].filter(id => id !== focusId);
+    function relaxPositions(posMap, focusId, w, h, total) {
+        const ids = [...posMap.keys()].filter(i => i !== focusId);
         if (ids.length < 2) return posMap;
-        const nextMap = new Map(posMap);
-        const minDist = getNodeRadius(false, totalCount) * 2 + 12;
-        for (let k = 0; k < 10; k++) {
-            for (let i = 0; i < ids.length; i++) {
-                for (let j = i + 1; j < ids.length; j++) {
-                    const idA = ids[i], idB = ids[j];
-                    const a = nextMap.get(idA), b = nextMap.get(idB);
+        const min = getNodeRadius(false, total) * 2 + 12;
+        for (let k=0;k<10;k++) {
+            for (let i=0;i<ids.length;i++) {
+                for (let j=i+1;j<ids.length;j++) {
+                    const a = posMap.get(ids[i]), b = posMap.get(ids[j]);
                     if (!a || !b) continue;
                     let dx = b.x - a.x, dy = b.y - a.y;
-                    let dist = Math.hypot(dx, dy);
-                    if (dist < 0.0001) { dx = Math.random() - 0.5; dy = Math.random() - 0.5; dist = Math.hypot(dx, dy) || 1; }
-                    if (dist >= minDist) continue;
-                    const push = (minDist - dist) * 0.5;
-                    const nx = dx / dist, ny = dy / dist;
-                    a.x -= nx * push; a.y -= ny * push;
-                    b.x += nx * push; b.y += ny * push;
+                    let d = Math.hypot(dx, dy);
+                    if (d < 0.001) { dx = Math.random()-0.5; dy = Math.random()-0.5; d = Math.hypot(dx,dy)||1; }
+                    if (d >= min) continue;
+                    const push = (min - d)*0.5;
+                    a.x -= dx/d*push; a.y -= dy/d*push;
+                    b.x += dx/d*push; b.y += dy/d*push;
                 }
             }
-            ids.forEach(id => {
-                const p = nextMap.get(id);
-                if (!p) return;
-                p.x = Math.min(w - 56, Math.max(56, p.x));
-                p.y = Math.min(h - 64, Math.max(64, p.y));
-            });
+            ids.forEach(id => { const p = posMap.get(id); p.x = Math.min(w-50, Math.max(50, p.x)); p.y = Math.min(h-50, Math.max(50, p.y)); });
         }
-        return nextMap;
-    }
-
-    function getNodeAlpha(displayPos, personId, radius) {
-        const pos = displayPos.get(personId);
-        if (!pos) return 1;
-        for (const [otherId, otherPos] of displayPos.entries()) {
-            if (otherId === personId) continue;
-            const otherRadius = getNodeRadius(false, persons.length);
-            const d = Math.hypot(pos.x - otherPos.x, pos.y - otherPos.y);
-            if (d < radius + otherRadius - 4) return 0.86;
-        }
-        return 1;
+        return posMap;
     }
 
     function computePositions(focusId) {
-        const posMap = new Map();
+        const m = new Map();
         const w = canvas.width, h = canvas.height;
-        if (persons.length === 0) return posMap;
-        const validFocusId = persons.some(p => p.id === focusId) ? focusId : persons[0].id;
-        const centerX = w / 2, centerY = h / 2;
-        posMap.set(validFocusId, { x: centerX, y: centerY });
-        const others = persons.filter(p => p.id !== validFocusId);
-        const count = others.length;
-        if (count === 0) return posMap;
-        const baseR = Math.min(w, h) * 0.28;
-        const secondR = Math.min(w, h) * 0.4;
-        const firstRingCap = Math.min(10, count);
-        const secondRingCount = Math.max(0, count - firstRingCap);
-        const startAngle = -Math.PI / 2;
-        others.forEach((p, index) => {
-            const inFirstRing = index < firstRingCap;
-            const ringIndex = inFirstRing ? index : (index - firstRingCap);
-            const ringCount = inFirstRing ? firstRingCap : secondRingCount;
-            const radius = inFirstRing ? baseR : secondR;
-            const step = ringCount > 0 ? (Math.PI * 2) / ringCount : 0;
-            const angle = startAngle + ringIndex * step + (inFirstRing ? 0 : step * 0.5);
-            let x = centerX + Math.cos(angle) * radius;
-            let y = centerY + Math.sin(angle) * radius;
-            x = Math.min(w - 56, Math.max(56, x));
-            y = Math.min(h - 64, Math.max(64, y));
-            posMap.set(p.id, { x, y });
+        if (!persons.length) return m;
+        const f = persons.some(p => p.id === focusId) ? focusId : persons[0].id;
+        m.set(f, {x:w/2, y:h/2});
+        const others = persons.filter(p => p.id !== f);
+        const cnt = others.length;
+        if (!cnt) return m;
+        const r1 = Math.min(w,h)*0.28, r2 = Math.min(w,h)*0.4;
+        const cap = Math.min(10, cnt);
+        others.forEach((p,i) => {
+            const ring1 = i < cap;
+            const r = ring1 ? r1 : r2;
+            const step = Math.PI*2/(ring1 ? cap : cnt-cap);
+            const ang = -Math.PI/2 + (ring1 ? i : i-cap)*step;
+            m.set(p.id, {
+                x: Math.min(w-50, Math.max(50, w/2 + Math.cos(ang)*r)),
+                y: Math.min(h-50, Math.max(50, h/2 + Math.sin(ang)*r))
+            });
         });
-        return relaxPositions(posMap, validFocusId, w, h, persons.length);
+        return relaxPositions(m, f, w, h, persons.length);
     }
 
-    function getFloatOffset(personId, isFocus, now) {
-        if (!floatState.has(personId)) {
-            floatState.set(personId, {
-                phase: Math.random() * Math.PI * 2,
-                speed: 0.0012 + Math.random() * 0.001,
-                ampX: 1.8 + Math.random() * 1.6,
-                ampY: 2.0 + Math.random() * 1.8
-            });
-        }
-        const f = floatState.get(personId);
+    function getFloatOffset(pid, isFocus, now) {
+        const f = floatState.get(pid);
         const t = now * f.speed + f.phase;
-        const focusScale = isFocus ? 0.7 : 1;
-        return { x: Math.sin(t) * f.ampX * focusScale, y: Math.cos(t * 1.13) * f.ampY * focusScale };
+        const s = isFocus ? 0.7 : 1;
+        return {x: Math.sin(t)*f.ampX*s, y: Math.cos(t*1.13)*f.ampY*s};
     }
 
-    function applyFloatingToPosMap(basePosMap, focusId, now) {
-        const displayPos = new Map();
-        basePosMap.forEach((pos, personId) => {
-            const offset = getFloatOffset(personId, personId === focusId, now);
-            displayPos.set(personId, { x: pos.x + offset.x, y: pos.y + offset.y });
-        });
-        return displayPos;
+    function applyFloat(base, focus, now) {
+        const m = new Map();
+        base.forEach((pos, id) => { const o = getFloatOffset(id, id===focus, now); m.set(id, {x:pos.x+o.x, y:pos.y+o.y}); });
+        return m;
     }
 
-    function buildRelationOffsetMap(relsToDraw) {
-        const offsetMap = new Map();
-        const directedGroups = new Map();
-        relsToDraw.forEach(rel => {
-            const key = `${rel.sourceId}->${rel.targetId}`;
-            if (!directedGroups.has(key)) directedGroups.set(key, []);
-            directedGroups.get(key).push(rel);
-        });
-        directedGroups.forEach(group => {
-            const count = group.length;
-            group.forEach((rel, index) => {
-                const lane = index - (count - 1) / 2;
-                const curveOffset = count === 1 ? 10 : (10 + lane * 12);
-                const labelShift = lane * 20;
-                offsetMap.set(rel.id, { curveOffset, labelShift });
-            });
-        });
-        return offsetMap;
+    function buildOffsetMap(rels) {
+        const map = new Map();
+        const groups = new Map();
+        rels.forEach(r => { const k = `${r.sourceId}->${r.targetId}`; if (!groups.has(k)) groups.set(k, []); groups.get(k).push(r); });
+        groups.forEach(g => { g.forEach((r,i) => { const lane = i - (g.length-1)/2; map.set(r.id, {curve:10+lane*12, shift:lane*20}); }); });
+        return map;
     }
 
-    function drawCurve(ctx, fromX, fromY, toX, toY, offset, color, lineWidth) {
-        const dx = toX - fromX, dy = toY - fromY;
-        const len = Math.hypot(dx, dy);
-        if (len < 0.1) return;
-        const perpX = -dy / len, perpY = dx / len;
-        const cp1x = fromX + dx * 0.33 + perpX * offset;
-        const cp1y = fromY + dy * 0.33 + perpY * offset;
-        const cp2x = fromX + dx * 0.67 + perpX * offset;
-        const cp2y = fromY + dy * 0.67 + perpY * offset;
-        ctx.beginPath();
-        ctx.moveTo(fromX, fromY);
-        ctx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, toX, toY);
-        ctx.strokeStyle = color;
-        ctx.lineWidth = lineWidth;
-        ctx.lineCap = 'round';
-        ctx.stroke();
+    function drawCurve(ctx, fx,fy,tx,ty,off,c,w) {
+        const dx=tx-fx, dy=ty-fy, d=Math.hypot(dx,dy); if (d<1) return;
+        const px=-dy/d, py=dx/d;
+        ctx.beginPath(); ctx.moveTo(fx,fy);
+        ctx.bezierCurveTo(fx+dx*0.33+px*off, fy+dy*0.33+py*off, fx+dx*0.67+px*off, fy+dy*0.67+py*off, tx,ty);
+        ctx.strokeStyle=c; ctx.lineWidth=w; ctx.lineCap='round'; ctx.stroke();
     }
 
-    function drawArrowAtEnd(ctx, fromX, fromY, toX, toY, offset, color) {
-        const dx = toX - fromX, dy = toY - fromY;
-        const len = Math.hypot(dx, dy);
-        if (len < 0.1) return;
-        const perpX = -dy / len, perpY = dx / len;
-        const angle = Math.atan2(dy, dx);
-        const arrowX = toX - 16 * Math.cos(angle) + perpX * offset * 0.3;
-        const arrowY = toY - 16 * Math.sin(angle) + perpY * offset * 0.3;
-        ctx.save();
-        ctx.translate(arrowX, arrowY);
-        ctx.rotate(angle);
-        ctx.beginPath();
-        ctx.moveTo(8, 0);
-        ctx.lineTo(-5, -4);
-        ctx.lineTo(-5, 4);
-        ctx.fillStyle = color;
-        ctx.fill();
-        ctx.restore();
+    function drawArrow(ctx,fx,fy,tx,ty,off,c) {
+        const dx=tx-fx, dy=ty-fy, d=Math.hypot(dx,dy); if (d<1) return;
+        const a = Math.atan2(dy,dx); const px=-dy/d, py=dx/d;
+        const x=tx-16*Math.cos(a)+px*off*0.3; const y=ty-16*Math.sin(a)+py*off*0.3;
+        ctx.save(); ctx.translate(x,y); ctx.rotate(a); ctx.beginPath(); ctx.moveTo(8,0); ctx.lineTo(-5,-4); ctx.lineTo(-5,4); ctx.fillStyle=c; ctx.fill(); ctx.restore();
     }
 
-    function drawRelationName(ctx, name, fromX, fromY, toX, toY, offset, textColor, labelShift = 0) {
-        const dx = toX - fromX, dy = toY - fromY;
-        const len = Math.hypot(dx, dy);
-        if (len < 0.1 || !name) return;
-        const perpX = -dy / len, perpY = dx / len;
-        const tanX = dx / len, tanY = dy / len;
-        const midX = fromX + dx * 0.5 + perpX * offset + tanX * labelShift;
-        const midY = fromY + dy * 0.5 + perpY * offset + tanY * labelShift;
-        ctx.font = "11px 'Inter', sans-serif";
-        const metrics = ctx.measureText(name);
-        const padding = 5;
-        const bgWidth = metrics.width + padding * 2;
-        const bgHeight = 18;
-        ctx.fillStyle = "rgba(0,0,0,0.7)";
-        ctx.beginPath();
-        ctx.roundRect(midX - bgWidth/2, midY - bgHeight/2, bgWidth, bgHeight, 10);
-        ctx.fill();
-        ctx.fillStyle = textColor;
-        ctx.textAlign = "center";
-        ctx.fillText(name, midX, midY + 4);
-        ctx.textAlign = "left";
+    function drawLabel(ctx,t,fx,fy,tx,ty,off,c,shift=0) {
+        const dx=tx-fx, dy=ty-fy, d=Math.hypot(dx,dy); if (d<1||!t) return;
+        const px=-dy/d, py=dx/d, tx_=dx/d, ty_=dy/d;
+        const mx=fx+dx*0.5+px*off+tx_*shift; const my=fy+dy*0.5+py*off+ty_*shift;
+        ctx.font="11px Inter"; const w=ctx.measureText(t).width;
+        ctx.fillStyle="rgba(0,0,0,0.7)"; ctx.beginPath(); ctx.roundRect(mx-w/2-5,my-9,w+10,18,10); ctx.fill();
+        ctx.fillStyle=c; ctx.textAlign="center"; ctx.fillText(t,mx,my+4); ctx.textAlign="left";
     }
 
     if (!CanvasRenderingContext2D.prototype.roundRect) {
-        CanvasRenderingContext2D.prototype.roundRect = function(x, y, w, h, r) {
-            if (w < 2 * r) r = w / 2;
-            if (h < 2 * r) r = h / 2;
-            this.moveTo(x+r, y);
-            this.lineTo(x+w-r, y);
-            this.quadraticCurveTo(x+w, y, x+w, y+r);
-            this.lineTo(x+w, y+h-r);
-            this.quadraticCurveTo(x+w, y+h, x+w-r, y+h);
-            this.lineTo(x+r, y+h);
-            this.quadraticCurveTo(x, y+h, x, y+h-r);
-            this.lineTo(x, y+r);
-            this.quadraticCurveTo(x, y, x+r, y);
-            return this;
+        CanvasRenderingContext2D.prototype.roundRect=function(x,y,w,h,r){
+            r=Math.min(r,w/2,h/2); this.moveTo(x+r,y); this.lineTo(x+w-r,y);
+            this.quadraticCurveTo(x+w,y,x+w,y+r); this.lineTo(x+w,y+h-r);
+            this.quadraticCurveTo(x+w,y+h,x+w-r,y+h); this.lineTo(x+r,y+h);
+            this.quadraticCurveTo(x,y+h,x,y+h-r); this.lineTo(x,y+r);
+            this.quadraticCurveTo(x,y,x+r,y); return this;
         };
     }
 
     function drawGraph() {
-        if (animationState.isAnimating) return;
-        const w = canvas.width, h = canvas.height;
-        ctx.clearRect(0, 0, w, h);
-        if (persons.length === 0) {
-            ctx.font = "16px Inter, sans-serif";
-            ctx.fillStyle = "#ccaa88";
-            ctx.textAlign = "center";
-            ctx.fillText("📝 右侧添加人物，开始绘制共用关系图", w/2, h/2);
-            ctx.textAlign = "left";
-            return;
-        }
-        const validFocusId = focusedPersonId && persons.some(p => p.id === focusedPersonId) ? focusedPersonId : persons[0].id;
-        const posMap = computePositions(validFocusId);
-        const displayPos = applyFloatingToPosMap(posMap, validFocusId, performance.now());
-        let relsToDraw = getPersonVisibleRelations(validFocusId);
-        if (activeFilter) relsToDraw = relsToDraw.filter(r => r.name === activeFilter);
-        const relOffsetMap = buildRelationOffsetMap(relsToDraw);
-        relsToDraw.forEach(rel => {
-            const sourcePos = displayPos.get(rel.sourceId);
-            const targetPos = displayPos.get(rel.targetId);
-            if (!sourcePos || !targetPos) return;
-            const relLayout = relOffsetMap.get(rel.id) || { curveOffset: 10, labelShift: 0 };
-            const offset = relLayout.curveOffset;
-            const isFocusSource = rel.sourceId === validFocusId;
-            const isFocusTarget = rel.targetId === validFocusId;
-            const lineColor = (isFocusSource || isFocusTarget) ? "#ffcc99" : "#6a5a4e";
-            const lineWidth = (isFocusSource || isFocusTarget) ? 3.5 : 1.8;
-            drawCurve(ctx, sourcePos.x, sourcePos.y, targetPos.x, targetPos.y, offset, lineColor, lineWidth);
-            drawArrowAtEnd(ctx, sourcePos.x, sourcePos.y, targetPos.x, targetPos.y, offset, lineColor);
+        const w=canvas.width, h=canvas.height; ctx.clearRect(0,0,w,h);
+        if (!persons.length) { ctx.font="16px Inter"; ctx.fillStyle="#ccaa88"; ctx.textAlign="center"; ctx.fillText("加载数据中...",w/2,h/2); ctx.textAlign="left"; return; }
+        const f = focusedPersonId || persons[0].id;
+        const base=computePositions(f);
+        const disp=applyFloat(base,f,performance.now());
+        let rels=getPersonVisibleRelations(f);
+        if (activeFilter) rels=rels.filter(r=>r.name===activeFilter);
+        const off=buildOffsetMap(rels);
+
+        rels.forEach(r=>{ const s=disp.get(r.sourceId), t=disp.get(r.targetId); if (!s||!t) return; const o=off.get(r.id)?.curve||10; const col = r.sourceId===f||r.targetId===f ? "#ffcc99" : "#6a5a4e"; drawCurve(ctx,s.x,s.y,t.x,t.y,o,col,r.sourceId===f||r.targetId===f?3.5:1.8); drawArrow(ctx,s.x,s.y,t.x,t.y,o,col); });
+        rels.forEach(r=>{ const s=disp.get(r.sourceId), t=disp.get(r.targetId); if (!s||!t||!r.name) return; const o=off.get(r.id)?.curve||10; const sh=off.get(r.id)?.shift||0; const col = r.sourceId===f||r.targetId===f ? "#ffdd99" : "#ccaa88"; drawLabel(ctx,r.name,s.x,s.y,t.x,t.y,o,col,sh); });
+
+        disp.forEach((pos,id)=>{
+            const p=persons.find(x=>x.id===id); if (!p) return;
+            const isF=id===f; const r=getNodeRadius(isF,persons.length);
+            ctx.shadowBlur=isF?18:8; ctx.shadowColor=p.color+"80";
+            const g=ctx.createRadialGradient(pos.x-8,pos.y-8,5,pos.x,pos.y,r);
+            g.addColorStop(0,p.color); g.addColorStop(1,"#2a2340");
+            ctx.beginPath(); ctx.arc(pos.x,pos.y,r,0,Math.PI*2); ctx.fillStyle=g; ctx.fill();
+            ctx.strokeStyle=isF?"#ffdd99":"#bb9977"; ctx.lineWidth=isF?3:2; ctx.stroke();
+            ctx.font=`bold ${isF?17:14}px Inter`; ctx.fillStyle="#fff5ea"; ctx.textAlign="center"; ctx.textShadow="0 1px 2px #0008";
+            const n=p.name.length>4?p.name.slice(0,4)+"…":p.name; ctx.fillText(n,pos.x,pos.y+5);
+            if (isF) { ctx.font="16px Font Awesome"; ctx.fillStyle="#ffdd99"; ctx.fillText("\uf005",pos.x+22,pos.y-14); }
+            ctx.textAlign="left"; ctx.textShadow="none";
         });
-        relsToDraw.forEach(rel => {
-            const sourcePos = displayPos.get(rel.sourceId);
-            const targetPos = displayPos.get(rel.targetId);
-            if (!sourcePos || !targetPos || !rel.name) return;
-            const relLayout = relOffsetMap.get(rel.id) || { curveOffset: 10, labelShift: 0 };
-            const offset = relLayout.curveOffset;
-            const isFocusSource = rel.sourceId === validFocusId;
-            const isFocusTarget = rel.targetId === validFocusId;
-            const textColor = (isFocusSource || isFocusTarget) ? "#ffdd99" : "#ccaa88";
-            drawRelationName(ctx, rel.name, sourcePos.x, sourcePos.y, targetPos.x, targetPos.y, offset, textColor, relLayout.labelShift);
-        });
-        displayPos.forEach((pos, personId) => {
-            const person = persons.find(p => p.id === personId);
-            if (!person) return;
-            const isFocus = personId === validFocusId;
-            const radius = getNodeRadius(isFocus, persons.length);
-            const nodeAlpha = getNodeAlpha(displayPos, personId, radius);
-            ctx.shadowBlur = isFocus ? 18 : 8;
-            ctx.shadowColor = `${person.color}80`;
-            ctx.globalAlpha = nodeAlpha;
-            const grad = ctx.createRadialGradient(pos.x - 8, pos.y - 8, 5, pos.x, pos.y, radius);
-            grad.addColorStop(0, person.color);
-            grad.addColorStop(1, "#2a2340");
-            ctx.beginPath();
-            ctx.arc(pos.x, pos.y, radius, 0, Math.PI * 2);
-            ctx.fillStyle = grad;
-            ctx.fill();
-            ctx.strokeStyle = isFocus ? "#ffdd99" : "#bb9977";
-            ctx.lineWidth = isFocus ? 3 : 2;
-            ctx.stroke();
-            ctx.font = `bold ${isFocus ? 17 : 14}px "Inter", sans-serif`;
-            ctx.fillStyle = "#fff5ea";
-            ctx.textAlign = "center";
-            ctx.textShadow = "0 1px 2px rgba(0,0,0,0.5)";
-            const displayName = person.name.length > 4 ? person.name.slice(0, 4) + "..." : person.name;
-            ctx.fillText(displayName, pos.x, pos.y + 5);
-            if (isFocus) {
-                ctx.font = "16px 'Font Awesome 6 Free', sans-serif";
-                ctx.fillStyle = "#ffdd99";
-                ctx.fillText("\uf005", pos.x + 22, pos.y - 14);
-            }
-            ctx.textAlign = "left";
-            ctx.textShadow = "none";
-            ctx.globalAlpha = 1;
-        });
-        ctx.shadowBlur = 0;
-        ctx.shadowColor = "transparent";
+        ctx.shadowBlur=0;
     }
 
-    function handleCanvasClick(e) {
-        if (persons.length === 0 || animationState.isAnimating) return;
-        const rect = canvas.getBoundingClientRect();
-        const scaleX = canvas.width / rect.width;
-        const scaleY = canvas.height / rect.height;
-        const mx = (e.clientX - rect.left) * scaleX;
-        const my = (e.clientY - rect.top) * scaleY;
-        const currentFocus = focusedPersonId || persons[0].id;
-        const posMap = computePositions(currentFocus);
-        const displayPos = applyFloatingToPosMap(posMap, currentFocus, performance.now());
-        let clickedPersonId = null;
-        displayPos.forEach((pos, personId) => {
-            const person = persons.find(p => p.id === personId);
-            if (!person) return;
-            const radius = getNodeRadius(personId === currentFocus, persons.length);
-            if (Math.hypot(mx - pos.x, my - pos.y) <= radius + 5) clickedPersonId = personId;
-        });
-        if (clickedPersonId && clickedPersonId !== focusedPersonId) {
-            focusedPersonId = clickedPersonId;
-            drawGraph();
-        }
+    // ====================== 交互 ======================
+    function onClick(e) {
+        const r=canvas.getBoundingClientRect(); const sx=canvas.width/r.width, sy=canvas.height/r.height;
+        const x=(e.clientX-r.left)*sx, y=(e.clientY-r.top)*sy;
+        const f=focusedPersonId||persons[0].id; const b=computePositions(f); const d=applyFloat(b,f,performance.now());
+        let target=null;
+        d.forEach((pos,id)=>{ const p=persons.find(x=>x.id===id); const rr=getNodeRadius(id===f,persons.length); if (Math.hypot(x-pos.x,y-pos.y)<=rr+5) target=id; });
+        if (target && target!==focusedPersonId) { focusedPersonId=target; drawGraph(); }
     }
 
-    // UI刷新
-    function refreshUI() {
-        const container = document.getElementById('peopleList');
-        if (container) {
-            if (persons.length === 0) {
-                container.innerHTML = '<div style="padding:15px;text-align:center;color:#aaa">📝 暂无人物，请添加</div>';
-            } else {
-                container.innerHTML = persons.map(p => `
-                    <div class="list-item">
-                        <span class="item-name" style="background:${p.color}40; padding:2px 12px; border-radius:30px;">${p.name} ${p.title ? '· ' + p.title : ''}</span>
-                        <button class="del-btn" onclick="window.handleDeletePerson(${p.id})"><i class="fas fa-trash-alt"></i> 删除</button>
-                    </div>
-                `).join('');
-            }
-        }
-
-        const relationContainer = document.getElementById('relationList');
-        if (relationContainer) {
-            if (relations.length === 0) {
-                relationContainer.innerHTML = '<div style="padding:15px;text-align:center;color:#aaa">暂无关系</div>';
-            } else {
-                relationContainer.innerHTML = relations.map(r => `
-                    <div class="list-item" style="font-size:0.75rem; padding:4px 10px;">
-                        <span>${getSourceName(r.sourceId)} → ${getSourceName(r.targetId)} [${r.name}]</span>
-                        <button class="del-btn" onclick="window.handleDeleteRelation(${r.id})"><i class="fas fa-trash-alt"></i> 删除</button>
-                    </div>
-                `).join('');
-            }
-        }
-
-        const filterContainer = document.getElementById('filterTags');
-        if (filterContainer) {
-            const uniqueNames = [...new Set(relations.map(r => r.name).filter(n => n))];
-            if (uniqueNames.length === 0) {
-                filterContainer.innerHTML = '<span style="font-size:0.7rem; color:#aaa">暂无关系类型</span>';
-            } else {
-                filterContainer.innerHTML = uniqueNames.map(name => `
-                    <div class="filter-tag ${activeFilter === name ? 'active' : ''}" onclick="window.setFilter('${name.replace(/'/g, "\\'")}')">${name}</div>
-                `).join('');
-            }
-        }
-
-        const selA = document.getElementById('selectA');
-        const selB = document.getElementById('selectB');
-        if (selA && selB) {
-            const options = persons.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
-            selA.innerHTML = `<option value="">— 选择人物A —</option>${options}`;
-            selB.innerHTML = `<option value="">— 选择人物B —</option>${options}`;
-        }
+    // ====================== 筛选 ======================
+    function refreshFilter() {
+        const box=document.getElementById("filterTags");
+        const uniq=[...new Set(relations.map(r=>r.name).filter(Boolean))];
+        if (!uniq.length) { box.innerHTML="<span style='font-size:12px;opacity:0.6'>暂无关系</span>"; return; }
+        box.innerHTML=uniq.map(n=>`<div class="filter-tag ${activeFilter===n?'active':''}" onclick="setFilter('${n.replace(/'/g,"\\'")}')">${n}</div>`).join("");
     }
+    function setFilter(n) { activeFilter=activeFilter===n?null:n; refreshFilter(); drawGraph(); }
+    function clearFilter() { activeFilter=null; refreshFilter(); drawGraph(); }
 
-    function setFilter(name) {
-        activeFilter = activeFilter === name ? null : name;
-        refreshUI();
-        drawGraph();
-    }
+    // ====================== 樱花 ======================
+    const sCanvas=document.getElementById("sakuraCanvas"); let sCtx=sCanvas.getContext("2d"); let petals=[];
+    class Petal{constructor(){this.x=Math.random()*innerWidth;this.y=Math.random()*innerHeight-innerHeight;this.size=3+Math.random()*8;this.sy=0.5+Math.random()*1.5;this.sx=-0.3+Math.random()*0.6;this.rot=Math.random()*Math.PI*2;this.rs=0.005+Math.random()*0.015;this.op=0.4+Math.random()*0.5;this.color=`rgba(255,${180+Math.random()*50},${180+Math.random()*60},${this.op})`;this.swing=Math.random()*0.02;this.sp=Math.random()*Math.PI*2;}update(){this.sp+=this.swing;this.x+=this.sx+Math.sin(this.sp)*0.8;this.y+=this.sy+Math.cos(this.sp)*0.3;this.rot+=this.rs;if(this.y>innerHeight+30||this.x<-30||this.x>innerWidth+30){this.x=Math.random()*innerWidth;this.y=-20;this.sp=Math.random()*Math.PI*2;}}draw(c){c.save();c.translate(this.x,this.y);c.rotate(this.rot);c.globalAlpha=this.op;c.fillStyle=this.color;c.beginPath();for(let i=0;i<5;i++){const a=(i*Math.PI*2/5)-Math.PI/2;const r=this.size*(0.8+Math.random()*0.2);const x=r*Math.cos(a),y=r*Math.sin(a);i?c.lineTo(x,y):c.moveTo(x,y);}c.closePath();c.fill();c.fillStyle=`rgba(255,220,220,${this.op+0.1})`;c.beginPath();c.arc(0,0,this.size*0.2,0,Math.PI*2);c.fill();c.restore();}}
+    function startSakura(){sCanvas.width=innerWidth;sCanvas.height=innerHeight;petals=Array.from({length:80},()=>new Petal());(function loop(){sCtx.clearRect(0,0,sCanvas.width,sCanvas.height);petals.forEach(p=>{p.update();p.draw(sCtx);});requestAnimationFrame(loop);})();}
+    window.addEventListener("resize",()=>{sCanvas.width=innerWidth;sCanvas.height=innerHeight;});
 
-    function clearFilter() {
-        activeFilter = null;
-        refreshUI();
-        drawGraph();
-    }
-
-    // 樱花特效
-    const sakuraCanvas = document.getElementById('sakuraCanvas');
-    let sakuraCtx = sakuraCanvas.getContext('2d');
-    let petals = [];
-
-    function resizeSakura() { sakuraCanvas.width = window.innerWidth; sakuraCanvas.height = window.innerHeight; }
-
-    class Petal {
-        constructor() {
-            this.x = Math.random() * sakuraCanvas.width;
-            this.y = Math.random() * sakuraCanvas.height - sakuraCanvas.height;
-            this.size = 3 + Math.random() * 8;
-            this.speedY = 0.5 + Math.random() * 1.5;
-            this.speedX = -0.3 + Math.random() * 0.6;
-            this.rotation = Math.random() * Math.PI * 2;
-            this.rotSpeed = 0.005 + Math.random() * 0.015;
-            this.opacity = 0.4 + Math.random() * 0.5;
-            this.color = `rgba(255, ${180 + Math.random() * 50}, ${180 + Math.random() * 60}, ${this.opacity})`;
-            this.swing = Math.random() * 0.02;
-            this.swingPhase = Math.random() * Math.PI * 2;
-        }
-        update() {
-            this.swingPhase += this.swing;
-            this.x += this.speedX + Math.sin(this.swingPhase) * 0.8;
-            this.y += this.speedY + Math.cos(this.swingPhase) * 0.3;
-            this.rotation += this.rotSpeed;
-            if (this.y > sakuraCanvas.height + 30 || this.x < -30 || this.x > sakuraCanvas.width + 30) {
-                this.x = Math.random() * sakuraCanvas.width;
-                this.y = -20;
-                this.swingPhase = Math.random() * Math.PI * 2;
-            }
-        }
-        draw(ctx) {
-            ctx.save();
-            ctx.translate(this.x, this.y);
-            ctx.rotate(this.rotation);
-            ctx.globalAlpha = this.opacity;
-            ctx.fillStyle = this.color;
-            ctx.beginPath();
-            for (let i = 0; i < 5; i++) {
-                const angle = (i * 2 * Math.PI / 5) - Math.PI / 2;
-                const r = this.size * (0.8 + Math.random() * 0.2);
-                const x = r * Math.cos(angle), y = r * Math.sin(angle);
-                if (i === 0) ctx.moveTo(x, y);
-                else ctx.lineTo(x, y);
-            }
-            ctx.closePath();
-            ctx.fill();
-            ctx.fillStyle = `rgba(255, 220, 220, ${this.opacity + 0.1})`;
-            ctx.beginPath();
-            ctx.arc(0, 0, this.size * 0.2, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.restore();
-        }
-    }
-
-    function initSakura(count = 80) { petals = []; for (let i = 0; i < count; i++) petals.push(new Petal()); }
-    function animateSakura() {
-        sakuraCtx.clearRect(0, 0, sakuraCanvas.width, sakuraCanvas.height);
-        for (let p of petals) { p.update(); p.draw(sakuraCtx); }
-        requestAnimationFrame(animateSakura);
-    }
-    function startSakura() { resizeSakura(); initSakura(80); animateSakura(); }
-    window.addEventListener('resize', () => { resizeSakura(); initSakura(80); });
-
-    // 事件绑定
-    function bindEvents() {
-        canvas.addEventListener('click', handleCanvasClick);
-        document.getElementById('addPersonBtn').addEventListener('click', handleAddPerson);
-        document.getElementById('addRelationBtn').addEventListener('click', handleAddRelation);
-        document.getElementById('clearFilterBtn').addEventListener('click', clearFilter);
-        document.getElementById('newName').addEventListener('keydown', (e) => { if (e.key === 'Enter') handleAddPerson(); });
-        document.getElementById('relationName').addEventListener('keydown', (e) => { if (e.key === 'Enter') handleAddRelation(); });
-    }
-
-    window.handleDeletePerson = handleDeletePerson;
-    window.handleDeleteRelation = handleDeleteRelation;
-    window.setFilter = setFilter;
-
-    // 初始化
+    // ====================== 启动 ======================
+    window.setFilter=setFilter; window.clearFilter=clearFilter;
+    function resizeCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; drawGraph(); }
     function init() {
+        resizeCanvas();
+        window.addEventListener("resize", resizeCanvas);
+        canvas.addEventListener("click", onClick);
+        document.getElementById("clearFilterBtn").addEventListener("click", clearFilter);
         startSakura();
-        bindEvents();
-        loadFromCloud();
-        // 30秒自动刷新一次公共数据
-        setInterval(loadFromCloud, 30000);
+        loadData(); // 读取 JSON
     }
-
-    window.addEventListener('DOMContentLoaded', init);
+    window.addEventListener("DOMContentLoaded", init);
 </script>
 </body>
 </html>
