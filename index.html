@@ -97,7 +97,7 @@
     // ====================== 从 GitPages 读取静态 JSON ======================
     async function loadData() {
         try {
-            const res = await fetch('./data.json');
+            const res = await fetch('https://Vinton626.github.io/relationship/data.json');
             const data = await res.json();
             persons = data.persons || [];
             relations = data.relations || [];
