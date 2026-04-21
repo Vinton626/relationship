@@ -4,132 +4,154 @@
       "id": 1,
       "name": "雨落止星棠",
       "title": "霖霖",
+      "school": "梨园",
       "color": "#d9a7c7"
     },
     {
       "id": 2,
       "name": "熙扶月",
       "title": "玉玉",
+      "school": "醉花阴",
       "color": "#d9a7c7"
     },
     {
       "id": 3,
       "name": "衣青黛",
       "title": "虹虹",
+      "school": "醉花阴",
       "color": "#d9a7c7"
     },
     {
       "id": 4,
       "name": "忆春语",
       "title": "鸢鸢",
+      "school": "青溪",
       "color": "#d9a7c7"
     },
     {
       "id": 5,
       "name": "醉余晚",
       "title": "钧钧",
+      "school": "无门无派",
       "color": "#d9a7c7"
     },
     {
       "id": 6,
       "name": "绾月尘",
       "title": "玉玉",
+      "school": "三更天",
       "color": "#d9a7c7"
     },
     {
       "id": 7,
       "name": "南官沁婉",
       "title": "鸢鸢",
+      "school": "无门无派",
       "color": "#d9a7c7"
     },
     {
       "id": 8,
       "name": "洋多余",
       "title": "鸢鸢",
+      "school": "天泉",
       "color": "#d9a7c7"
     },
     {
       "id": 9,
       "name": "黎氿瑜",
       "title": "玉玉",
+      "school": "无门无派",
       "color": "#d9a7c7"
     },
     {
       "id": 10,
       "name": "天邪玄尊",
       "title": "鸢鸢",
+      "school": "梨园",
       "color": "#d9a7c7"
     },
     {
       "id": 11,
       "name": "迦颐",
       "title": "虹虹",
+      "school": "九流门",
       "color": "#d9a7c7"
     },
     {
       "id": 12,
       "name": "我真的爱吃饭",
       "title": "钧钧",
+      "school": "青溪",
       "color": "#d9a7c7"
     },
     {
       "id": 13,
       "name": "昝千然",
       "title": "钧钧",
+      "school": "狂澜",
       "color": "#d9a7c7"
     },
     {
       "id": 14,
       "name": "弢藏",
       "title": "未知",
+      "school": "醉花阴",
       "color": "#d9a7c7"
     },
     {
       "id": 15,
       "name": "洛溪霜枫",
       "title": "钧钧",
+      "school": "墨山道",
       "color": "#d9a7c7"
     },
     {
       "id": 16,
       "name": "小卢打小旭",
       "title": "鸢鸢",
+      "school": "三更天",
       "color": "#d9a7c7"
     },
     {
       "id": 17,
       "name": "骑老奶闯红灯",
       "title": "影影",
+      "school": "九流门",
       "color": "#d9a7c7"
     },
     {
       "id": 18,
       "name": "竹墨染",
       "title": "虹虹",
+      "school": "无门无派",
       "color": "#d9a7c7"
     },
     {
       "id": 19,
       "name": "黄老妖",
       "title": "鸢鸢",
+      "school": "狂澜",
       "color": "#d9a7c7"
     },
     {
       "id": 20,
       "name": "叶成槿",
       "title": "虹虹",
+      "school": "醉花阴",
       "color": "#d9a7c7"
     },
     {
       "id": 21,
       "name": "寒霜从",
       "title": "钧钧",
+      "school": "醉花阴",
       "color": "#d9a7c7"
     },
     {
       "id": 22,
       "name": "愿温之",
       "title": "风风",
+      "school": "未知",
       "color": "#d9a7c7"
     }
   ],
@@ -739,6 +761,18 @@
       "sourceId": 22,
       "targetId": 21,
       "name": "师父"
+    },
+    {
+      "id": 128,
+      "sourceId": 2,
+      "targetId": 15,
+      "name": "侠缘"
+    },
+    {
+      "id": 129,
+      "sourceId": 15,
+      "targetId": 2,
+      "name": "侠缘"
     }
   ]
 }
