@@ -12,10 +12,10 @@
             font-family: 'Inter', sans-serif;
             background: linear-gradient(145deg, #1a1a2e 0%, #0d0d1a 100%);
             background-image: url('https://imgs.699pic.com/images/700/251/617.jpg!list1x.v2');
-            background-size: cover;           /* 图片拉伸/缩放至覆盖整个区域 */
-            background-repeat: no-repeat;     /* 禁止重复平铺 */
-            background-position: center center; /* 图片居中 */
-            background-attachment: fixed; 
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-position: center center;
+            background-attachment: fixed;
             overflow: hidden;
             position: fixed;
             top: 0;
@@ -38,7 +38,7 @@
             display: block;
             width: 100%;
             height: 100%;
-            background: rgba(25, 22, 40, 0.6);
+            background: rgba(25, 22, 40, 0.5);
             cursor: pointer;
         }
         
@@ -341,19 +341,20 @@
             ctx.lineWidth = isFocus ? (isMobile() ? 2 : 2.5) : (isMobile() ? 1.2 : 1.8);
             ctx.stroke();
             
-            const fontSize = isFocus ? (isMobile() ? 13 : 16) : (isMobile() ? 10 : 13);
+            // 手机端字号调大
+            const fontSize = isFocus ? (isMobile() ? 15 : 16) : (isMobile() ? 12 : 13);
             ctx.font = `bold ${fontSize}px "Inter", sans-serif`;
             ctx.fillStyle = "#fff5ea";
             ctx.textAlign = "center";
             ctx.textShadow = "0 1px 2px rgba(0,0,0,0.5)";
             const maxLen = isMobile() ? 5 : 6;
             const displayName = person.name.length > maxLen ? person.name.slice(0, maxLen) + "…" : person.name;
-            ctx.fillText(displayName, pos.x, pos.y + (isMobile() ? 3 : 5));
+            ctx.fillText(displayName, pos.x, pos.y + (isMobile() ? 4 : 5));
             
             if (isFocus) {
-                ctx.font = `${isMobile() ? 11 : 14}px "Font Awesome 6 Free", sans-serif`;
+                ctx.font = `${isMobile() ? 12 : 14}px "Font Awesome 6 Free", sans-serif`;
                 ctx.fillStyle = "#ffdd99";
-                ctx.fillText("\uf005", pos.x + (isMobile() ? 15 : 20), pos.y - (isMobile() ? 8 : 12));
+                ctx.fillText("\uf005", pos.x + (isMobile() ? 16 : 20), pos.y - (isMobile() ? 9 : 12));
             }
             
             ctx.textAlign = "left";
@@ -367,13 +368,15 @@
     function getSourceName(id) { const p = persons.find(x => x.id === id); return p ? p.name : "未知"; }
     function getPersonVisibleRelations(pid) { return relations.filter(r => r.sourceId === pid); }
     
-    // 节点大小：手机端缩小
+    // 节点大小：手机端稍微调大，电脑端恢复原来大小
     function getNodeRadius(isFocus, total) {
         const mobile = isMobile();
         if (mobile) {
-            if (isFocus) return Math.max(12, 18 - Math.floor(total / 12));
-            return Math.max(7, 12 - Math.floor(total / 14));
+            // 手机端：在现有基础上调大2-3px
+            if (isFocus) return Math.max(15, 21 - Math.floor(total / 12));
+            return Math.max(10, 15 - Math.floor(total / 14));
         } else {
+            // 电脑端：恢复原来的大小
             if (isFocus) return Math.max(22, 30 - Math.floor(total / 8));
             return Math.max(14, 22 - Math.floor(total / 10));
         }
@@ -516,7 +519,7 @@
         if (d < 1) return;
         const a = Math.atan2(dy, dx);
         const px = -dy / d, py = dx / d;
-        const arrowSize = isMobile() ? 9 : 14;
+        const arrowSize = isMobile() ? 10 : 14;
         const x = tx - arrowSize * Math.cos(a) + px * off * 0.3;
         const y = ty - arrowSize * Math.sin(a) + py * off * 0.3;
         ctx.save();
@@ -537,18 +540,18 @@
         const px = -dy / d, py = dx / d, tx_ = dx / d, ty_ = dy / d;
         const mx = fx + dx * 0.5 + px * off + tx_ * shift;
         const my = fy + dy * 0.5 + py * off + ty_ * shift;
-        const fontSize = isMobile() ? 9 : 11;
+        const fontSize = isMobile() ? 10 : 11;
         ctx.font = `${fontSize}px 'Inter', sans-serif`;
         const w = ctx.measureText(t).width;
-        const padding = isMobile() ? 3 : 4;
-        const bgHeight = isMobile() ? 14 : 18;
+        const padding = isMobile() ? 4 : 4;
+        const bgHeight = isMobile() ? 16 : 18;
         ctx.fillStyle = "rgba(0,0,0,0.65)";
         ctx.beginPath();
         ctx.roundRect(mx - w / 2 - padding, my - bgHeight / 2, w + padding * 2, bgHeight, bgHeight / 2);
         ctx.fill();
         ctx.fillStyle = c;
         ctx.textAlign = "center";
-        ctx.fillText(t, mx, my + 3);
+        ctx.fillText(t, mx, my + 4);
         ctx.textAlign = "left";
     }
 
@@ -628,19 +631,20 @@
             ctx.lineWidth = isF ? (isMobile() ? 2 : 2.5) : (isMobile() ? 1.2 : 1.8);
             ctx.stroke();
             
-            const fontSize = isF ? (isMobile() ? 13 : 16) : (isMobile() ? 10 : 13);
+            // 手机端字号调大
+            const fontSize = isF ? (isMobile() ? 15 : 16) : (isMobile() ? 12 : 13);
             ctx.font = `bold ${fontSize}px Inter`;
             ctx.fillStyle = "#fff5ea";
             ctx.textAlign = "center";
             ctx.textShadow = "0 1px 2px #0008";
             const maxLen = isMobile() ? 5 : 6;
             const n = p.name.length > maxLen ? p.name.slice(0, maxLen) + "…" : p.name;
-            ctx.fillText(n, pos.x, pos.y + (isMobile() ? 3 : 5));
+            ctx.fillText(n, pos.x, pos.y + (isMobile() ? 4 : 5));
             
             if (isF) {
-                ctx.font = `${isMobile() ? 11 : 14}px "Font Awesome 6 Free"`;
+                ctx.font = `${isMobile() ? 12 : 14}px "Font Awesome 6 Free"`;
                 ctx.fillStyle = "#ffdd99";
-                ctx.fillText("\uf005", pos.x + (isMobile() ? 15 : 20), pos.y - (isMobile() ? 8 : 12));
+                ctx.fillText("\uf005", pos.x + (isMobile() ? 16 : 20), pos.y - (isMobile() ? 9 : 12));
             }
             
             ctx.textAlign = "left";
