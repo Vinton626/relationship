@@ -85,7 +85,7 @@
 <div class="footer-note"><i class="fas fa-hand-pointer"></i> 点击圆点切换人物视角</div>
 
 <script>
-    // ====================== 全局变量 ======================
+    // ====================== 全局变量（恢复动画状态）======================
     let persons = [];
     let relations = [];
     let focusedPersonId = null;
@@ -93,10 +93,22 @@
     const canvas = document.getElementById('graphCanvas');
     let ctx = canvas.getContext('2d');
     let floatState = new Map();
+    
+    // 核心动画状态（你原来的聚焦动画逻辑）
+    let animationState = {
+        isAnimating: false,
+        startPos: new Map(),
+        targetPos: new Map(),
+        progress: 0,
+        duration: 500, // 动画时长（毫秒）
+        startTime: 0,
+        currentFocus: null
+    };
 
     // ====================== 从 GitPages 读取静态 JSON ======================
     async function loadData() {
         try {
+            // 替换成你的 Git Pages 绝对路径（必改！）
             const res = await fetch('https://Vinton626.github.io/relationship/data.json');
             const data = await res.json();
             persons = data.persons || [];
@@ -119,11 +131,158 @@
             drawGraph();
         } catch (err) {
             console.error("加载 data.json 失败：", err);
-            alert("请确保 data.json 文件与 index.html 放在同一目录");
+            alert("请检查 data.json 文件路径是否正确，或刷新页面重试");
         }
     }
 
-    // ====================== 绘图逻辑（完整保留）======================
+    // ====================== 动画核心函数（完整恢复）======================
+    function easeOutCubic(t) { return 1 - Math.pow(1 - t, 3); } // 缓动函数（平滑动画）
+
+    function animateFocusChange(newFocusId) {
+        if (animationState.isAnimating || !persons.length) return;
+        
+        // 记录动画起始状态
+        animationState.isAnimating = true;
+        animationState.startTime = performance.now();
+        animationState.currentFocus = newFocusId;
+        
+        // 获取当前位置（起始）和目标位置
+        const currentPos = computePositions(focusedPersonId);
+        const targetPos = computePositions(newFocusId);
+        
+        // 保存起始和目标位置
+        animationState.startPos.clear();
+        animationState.targetPos.clear();
+        persons.forEach(p => {
+            animationState.startPos.set(p.id, { ...currentPos.get(p.id) });
+            animationState.targetPos.set(p.id, { ...targetPos.get(p.id) });
+        });
+
+        // 启动动画帧
+        requestAnimationFrame(animateStep);
+    }
+
+    function animateStep(timestamp) {
+        if (!animationState.isAnimating) return;
+        
+        // 计算动画进度
+        const elapsed = timestamp - animationState.startTime;
+        animationState.progress = Math.min(elapsed / animationState.duration, 1);
+        const easeProgress = easeOutCubic(animationState.progress); // 应用缓动
+        
+        // 清空画布
+        const w = canvas.width, h = canvas.height;
+        ctx.clearRect(0, 0, w, h);
+        
+        // 计算当前帧的位置（起始 → 目标 插值）
+        const currentFramePos = new Map();
+        persons.forEach(p => {
+            const start = animationState.startPos.get(p.id);
+            const target = animationState.targetPos.get(p.id);
+            if (!start || !target) return;
+            
+            // 插值计算当前位置
+            const x = start.x + (target.x - start.x) * easeProgress;
+            const y = start.y + (target.y - start.y) * easeProgress;
+            
+            // 叠加浮动动画
+            const floatOffset = getFloatOffset(p.id, p.id === animationState.currentFocus, timestamp);
+            currentFramePos.set(p.id, {
+                x: x + floatOffset.x,
+                y: y + floatOffset.y
+            });
+        });
+
+        // 绘制当前帧（关系线 + 人物节点）
+        drawAnimatedFrame(currentFramePos, animationState.currentFocus);
+        
+        // 动画结束判断
+        if (animationState.progress >= 1) {
+            animationState.isAnimating = false;
+            focusedPersonId = animationState.currentFocus;
+            drawGraph(); // 画最终帧
+            return;
+        }
+        
+        // 继续下一帧
+        requestAnimationFrame(animateStep);
+    }
+
+    function drawAnimatedFrame(posMap, focusId) {
+        if (!persons.length) return;
+        
+        // 1. 绘制关系线
+        let relsToDraw = getPersonVisibleRelations(focusId);
+        if (activeFilter) relsToDraw = relsToDraw.filter(r => r.name === activeFilter);
+        const relOffsetMap = buildOffsetMap(relsToDraw);
+        
+        relsToDraw.forEach(r => {
+            const sourcePos = posMap.get(r.sourceId);
+            const targetPos = posMap.get(r.targetId);
+            if (!sourcePos || !targetPos) return;
+            const relLayout = relOffsetMap.get(r.id) || { curve: 10, shift: 0 };
+            const offset = relLayout.curve;
+            const isFocusSource = r.sourceId === focusId;
+            const isFocusTarget = r.targetId === focusId;
+            const lineColor = (isFocusSource || isFocusTarget) ? "#ffcc99" : "#6a5a4e";
+            const lineWidth = (isFocusSource || isFocusTarget) ? 3.5 : 1.8;
+            
+            drawCurve(ctx, sourcePos.x, sourcePos.y, targetPos.x, targetPos.y, offset, lineColor, lineWidth);
+            drawArrowAtEnd(ctx, sourcePos.x, sourcePos.y, targetPos.x, targetPos.y, offset, lineColor);
+            drawRelationName(ctx, r.name, sourcePos.x, sourcePos.y, targetPos.x, targetPos.y, offset, 
+                (isFocusSource || isFocusTarget) ? "#ffdd99" : "#ccaa88", relLayout.shift);
+        });
+
+        // 2. 绘制人物节点
+        posMap.forEach((pos, personId) => {
+            const person = persons.find(p => p.id === personId);
+            if (!person) return;
+            const isFocus = personId === focusId;
+            const radius = getNodeRadius(isFocus, persons.length);
+            
+            ctx.shadowBlur = isFocus ? 18 : 8;
+            ctx.shadowColor = `${person.color}80`;
+            ctx.globalAlpha = 1;
+            
+            // 渐变圆
+            const grad = ctx.createRadialGradient(pos.x - 8, pos.y - 8, 5, pos.x, pos.y, radius);
+            grad.addColorStop(0, person.color);
+            grad.addColorStop(1, "#2a2340");
+            
+            ctx.beginPath();
+            ctx.arc(pos.x, pos.y, radius, 0, Math.PI * 2);
+            ctx.fillStyle = grad;
+            ctx.fill();
+            
+            // 描边
+            ctx.strokeStyle = isFocus ? "#ffdd99" : "#bb9977";
+            ctx.lineWidth = isFocus ? 3 : 2;
+            ctx.stroke();
+            
+            // 文字
+            ctx.font = `bold ${isFocus ? 17 : 14}px "Inter", sans-serif`;
+            ctx.fillStyle = "#fff5ea";
+            ctx.textAlign = "center";
+            ctx.textShadow = "0 1px 2px rgba(0,0,0,0.5)";
+            const displayName = person.name.length > 4 ? person.name.slice(0, 4) + "..." : person.name;
+            ctx.fillText(displayName, pos.x, pos.y + 5);
+            
+            // 聚焦星标
+            if (isFocus) {
+                ctx.font = "16px 'Font Awesome 6 Free', sans-serif";
+                ctx.fillStyle = "#ffdd99";
+                ctx.fillText("\uf005", pos.x + 22, pos.y - 14);
+            }
+            
+            ctx.textAlign = "left";
+            ctx.textShadow = "none";
+        });
+        
+        ctx.shadowBlur = 0;
+        ctx.shadowColor = "transparent";
+    }
+
+    // ====================== 原有绘图逻辑（完整保留）======================
     function getSourceName(id) { const p = persons.find(x => x.id === id); return p ? p.name : "未知"; }
     function getPersonVisibleRelations(pid) { return relations.filter(r => r.sourceId === pid); }
     function getNodeRadius(isFocus, total) { return isFocus ? Math.max(30, 38 - Math.floor(total/8)) : Math.max(20, 28 - Math.floor(total/10)); }
@@ -204,14 +363,14 @@
         ctx.strokeStyle=c; ctx.lineWidth=w; ctx.lineCap='round'; ctx.stroke();
     }
 
-    function drawArrow(ctx,fx,fy,tx,ty,off,c) {
+    function drawArrowAtEnd(ctx,fx,fy,tx,ty,off,c) {
         const dx=tx-fx, dy=ty-fy, d=Math.hypot(dx,dy); if (d<1) return;
         const a = Math.atan2(dy,dx); const px=-dy/d, py=dx/d;
         const x=tx-16*Math.cos(a)+px*off*0.3; const y=ty-16*Math.sin(a)+py*off*0.3;
         ctx.save(); ctx.translate(x,y); ctx.rotate(a); ctx.beginPath(); ctx.moveTo(8,0); ctx.lineTo(-5,-4); ctx.lineTo(-5,4); ctx.fillStyle=c; ctx.fill(); ctx.restore();
     }
 
-    function drawLabel(ctx,t,fx,fy,tx,ty,off,c,shift=0) {
+    function drawRelationName(ctx,t,fx,fy,tx,ty,off,c,shift=0) {
         const dx=tx-fx, dy=ty-fy, d=Math.hypot(dx,dy); if (d<1||!t) return;
         const px=-dy/d, py=dx/d, tx_=dx/d, ty_=dy/d;
         const mx=fx+dx*0.5+px*off+tx_*shift; const my=fy+dy*0.5+py*off+ty_*shift;
@@ -231,8 +390,14 @@
     }
 
     function drawGraph() {
+        if (animationState.isAnimating) return; // 动画中不重绘
+        
         const w=canvas.width, h=canvas.height; ctx.clearRect(0,0,w,h);
-        if (!persons.length) { ctx.font="16px Inter"; ctx.fillStyle="#ccaa88"; ctx.textAlign="center"; ctx.fillText("加载数据中...",w/2,h/2); ctx.textAlign="left"; return; }
+        if (!persons.length) { 
+            ctx.font="16px Inter"; ctx.fillStyle="#ccaa88"; ctx.textAlign="center"; 
+            ctx.fillText("加载数据中...",w/2,h/2); ctx.textAlign="left"; return; 
+        }
+        
         const f = focusedPersonId || persons[0].id;
         const base=computePositions(f);
         const disp=applyFloat(base,f,performance.now());
@@ -240,33 +405,72 @@
         if (activeFilter) rels=rels.filter(r=>r.name===activeFilter);
         const off=buildOffsetMap(rels);
 
-        rels.forEach(r=>{ const s=disp.get(r.sourceId), t=disp.get(r.targetId); if (!s||!t) return; const o=off.get(r.id)?.curve||10; const col = r.sourceId===f||r.targetId===f ? "#ffcc99" : "#6a5a4e"; drawCurve(ctx,s.x,s.y,t.x,t.y,o,col,r.sourceId===f||r.targetId===f?3.5:1.8); drawArrow(ctx,s.x,s.y,t.x,t.y,o,col); });
-        rels.forEach(r=>{ const s=disp.get(r.sourceId), t=disp.get(r.targetId); if (!s||!t||!r.name) return; const o=off.get(r.id)?.curve||10; const sh=off.get(r.id)?.shift||0; const col = r.sourceId===f||r.targetId===f ? "#ffdd99" : "#ccaa88"; drawLabel(ctx,r.name,s.x,s.y,t.x,t.y,o,col,sh); });
+        // 绘制关系线
+        rels.forEach(r=>{ 
+            const s=disp.get(r.sourceId), t=disp.get(r.targetId); 
+            if (!s||!t) return; 
+            const o=off.get(r.id)?.curve||10; 
+            const col = r.sourceId===f||r.targetId===f ? "#ffcc99" : "#6a5a4e"; 
+            drawCurve(ctx,s.x,s.y,t.x,t.y,o,col,r.sourceId===f||r.targetId===f?3.5:1.8); 
+            drawArrowAtEnd(ctx,s.x,s.y,t.x,t.y,o,col); 
+        });
+        
+        // 绘制关系标签
+        rels.forEach(r=>{ 
+            const s=disp.get(r.sourceId), t=disp.get(r.targetId); 
+            if (!s||!t||!r.name) return; 
+            const o=off.get(r.id)?.curve||10; 
+            const sh=off.get(r.id)?.shift||0; 
+            const col = r.sourceId===f||r.targetId===f ? "#ffdd99" : "#ccaa88"; 
+            drawRelationName(ctx,r.name,s.x,s.y,t.x,t.y,o,col,sh); 
+        });
 
+        // 绘制人物节点
         disp.forEach((pos,id)=>{
             const p=persons.find(x=>x.id===id); if (!p) return;
             const isF=id===f; const r=getNodeRadius(isF,persons.length);
             ctx.shadowBlur=isF?18:8; ctx.shadowColor=p.color+"80";
+            
             const g=ctx.createRadialGradient(pos.x-8,pos.y-8,5,pos.x,pos.y,r);
             g.addColorStop(0,p.color); g.addColorStop(1,"#2a2340");
+            
             ctx.beginPath(); ctx.arc(pos.x,pos.y,r,0,Math.PI*2); ctx.fillStyle=g; ctx.fill();
             ctx.strokeStyle=isF?"#ffdd99":"#bb9977"; ctx.lineWidth=isF?3:2; ctx.stroke();
+            
             ctx.font=`bold ${isF?17:14}px Inter`; ctx.fillStyle="#fff5ea"; ctx.textAlign="center"; ctx.textShadow="0 1px 2px #0008";
             const n=p.name.length>4?p.name.slice(0,4)+"…":p.name; ctx.fillText(n,pos.x,pos.y+5);
+            
             if (isF) { ctx.font="16px Font Awesome"; ctx.fillStyle="#ffdd99"; ctx.fillText("\uf005",pos.x+22,pos.y-14); }
+            
             ctx.textAlign="left"; ctx.textShadow="none";
         });
+        
         ctx.shadowBlur=0;
     }
 
-    // ====================== 交互 ======================
+    // ====================== 交互（恢复动画触发）=====================
     function onClick(e) {
-        const r=canvas.getBoundingClientRect(); const sx=canvas.width/r.width, sy=canvas.height/r.height;
+        if (persons.length === 0 || animationState.isAnimating) return;
+        
+        const r=canvas.getBoundingClientRect(); 
+        const sx=canvas.width/r.width, sy=canvas.height/r.height;
         const x=(e.clientX-r.left)*sx, y=(e.clientY-r.top)*sy;
-        const f=focusedPersonId||persons[0].id; const b=computePositions(f); const d=applyFloat(b,f,performance.now());
+        
+        const f=focusedPersonId||persons[0].id; 
+        const b=computePositions(f); 
+        const d=applyFloat(b,f,performance.now());
+        
         let target=null;
-        d.forEach((pos,id)=>{ const p=persons.find(x=>x.id===id); const rr=getNodeRadius(id===f,persons.length); if (Math.hypot(x-pos.x,y-pos.y)<=rr+5) target=id; });
-        if (target && target!==focusedPersonId) { focusedPersonId=target; drawGraph(); }
+        d.forEach((pos,id)=>{ 
+            const p=persons.find(x=>x.id===id); 
+            const rr=getNodeRadius(id===f,persons.length); 
+            if (Math.hypot(x-pos.x,y-pos.y)<=rr+5) target=id; 
+        });
+        
+        // 触发平滑动画
+        if (target && target!==focusedPersonId) {
+            animateFocusChange(target); // 替换原来的直接赋值，改用动画
+        }
     }
 
     // ====================== 筛选 ======================
@@ -276,10 +480,18 @@
         if (!uniq.length) { box.innerHTML="<span style='font-size:12px;opacity:0.6'>暂无关系</span>"; return; }
         box.innerHTML=uniq.map(n=>`<div class="filter-tag ${activeFilter===n?'active':''}" onclick="setFilter('${n.replace(/'/g,"\\'")}')">${n}</div>`).join("");
     }
-    function setFilter(n) { activeFilter=activeFilter===n?null:n; refreshFilter(); drawGraph(); }
-    function clearFilter() { activeFilter=null; refreshFilter(); drawGraph(); }
+    function setFilter(n) { 
+        activeFilter=activeFilter===n?null:n; 
+        refreshFilter(); 
+        drawGraph(); 
+    }
+    function clearFilter() { 
+        activeFilter=null; 
+        refreshFilter(); 
+        drawGraph(); 
+    }
 
-    // ====================== 樱花 ======================
+    // ====================== 樱花特效 ======================
     const sCanvas=document.getElementById("sakuraCanvas"); let sCtx=sCanvas.getContext("2d"); let petals=[];
     class Petal{constructor(){this.x=Math.random()*innerWidth;this.y=Math.random()*innerHeight-innerHeight;this.size=3+Math.random()*8;this.sy=0.5+Math.random()*1.5;this.sx=-0.3+Math.random()*0.6;this.rot=Math.random()*Math.PI*2;this.rs=0.005+Math.random()*0.015;this.op=0.4+Math.random()*0.5;this.color=`rgba(255,${180+Math.random()*50},${180+Math.random()*60},${this.op})`;this.swing=Math.random()*0.02;this.sp=Math.random()*Math.PI*2;}update(){this.sp+=this.swing;this.x+=this.sx+Math.sin(this.sp)*0.8;this.y+=this.sy+Math.cos(this.sp)*0.3;this.rot+=this.rs;if(this.y>innerHeight+30||this.x<-30||this.x>innerWidth+30){this.x=Math.random()*innerWidth;this.y=-20;this.sp=Math.random()*Math.PI*2;}}draw(c){c.save();c.translate(this.x,this.y);c.rotate(this.rot);c.globalAlpha=this.op;c.fillStyle=this.color;c.beginPath();for(let i=0;i<5;i++){const a=(i*Math.PI*2/5)-Math.PI/2;const r=this.size*(0.8+Math.random()*0.2);const x=r*Math.cos(a),y=r*Math.sin(a);i?c.lineTo(x,y):c.moveTo(x,y);}c.closePath();c.fill();c.fillStyle=`rgba(255,220,220,${this.op+0.1})`;c.beginPath();c.arc(0,0,this.size*0.2,0,Math.PI*2);c.fill();c.restore();}}
     function startSakura(){sCanvas.width=innerWidth;sCanvas.height=innerHeight;petals=Array.from({length:80},()=>new Petal());(function loop(){sCtx.clearRect(0,0,sCanvas.width,sCanvas.height);petals.forEach(p=>{p.update();p.draw(sCtx);});requestAnimationFrame(loop);})();}
