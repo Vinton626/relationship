@@ -19,18 +19,6 @@
             height: 100%;
         }
         
-        /* 强制横屏：把整个页面旋转90度 */
-        .rotate-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vh;
-            height: 100vw;
-            transform-origin: 0 0;
-            transform: rotate(90deg) translateY(-100%);
-        }
-        
-        /* 樱花画布 */
         #sakuraCanvas {
             position: fixed;
             top: 0;
@@ -41,7 +29,6 @@
             z-index: 1;
         }
         
-        /* 关系图画布 */
         #graphCanvas {
             display: block;
             width: 100%;
@@ -74,9 +61,6 @@
             background: #d47a55;
             transform: scale(1.05);
         }
-        .filter-btn i {
-            font-size: 22px;
-        }
         
         /* 右侧浮层面板 - 默认隐藏 */
         .float-panel {
@@ -105,7 +89,6 @@
             visibility: visible;
         }
         
-        /* 关闭按钮 */
         .panel-close {
             position: absolute;
             top: 12px;
@@ -137,7 +120,6 @@
     </style>
 </head>
 <body>
-<div class="rotate-container">
     <canvas id="sakuraCanvas"></canvas>
     <canvas id="graphCanvas"></canvas>
     
@@ -156,9 +138,13 @@
         </div>
     </div>
     <div class="footer-note"><i class="fas fa-hand-pointer"></i> 点击圆点切换人物视角</div>
-</div>
 
 <script>
+    // ====================== 检测手机端 ======================
+    function isMobile() {
+        return window.innerWidth < 768;
+    }
+    
     // ====================== 面板隐藏/显示 ======================
     const filterBtn = document.getElementById('filterToggleBtn');
     const floatPanel = document.getElementById('floatPanel');
@@ -192,7 +178,6 @@
     let ctx = canvas.getContext('2d');
     let floatState = new Map();
     
-    // 核心动画状态
     let animationState = {
         isAnimating: false,
         startPos: new Map(),
@@ -204,17 +189,15 @@
         rafId: null
     };
 
-    // ====================== 从 GitPages 读取静态 JSON ======================
+    // ====================== 读取数据 ======================
     async function loadData() {
         try {
-            // 替换成你的 Git Pages 绝对路径（必改！）
             const res = await fetch('https://Vinton626.github.io/relationship/data.json');
             const data = await res.json();
             persons = data.persons || [];
             relations = data.relations || [];
             focusedPersonId = persons.length ? persons[0].id : null;
 
-            // 初始化浮动动画参数
             floatState.clear();
             persons.forEach(p => {
                 floatState.set(p.id, {
@@ -229,24 +212,18 @@
             resizeCanvas();
             drawGraph();
         } catch (err) {
-            console.error("加载 data.json 失败：", err);
-            alert("请检查 data.json 文件路径是否正确，或刷新页面重试");
+            console.error("加载失败：", err);
+            alert("请检查 data.json 文件路径");
         }
     }
 
-    // ====================== 缓动函数 ======================
-    function easeOutCubic(t) { 
-        return 1 - Math.pow(1 - t, 3); 
-    }
+    function easeOutCubic(t) { return 1 - Math.pow(1 - t, 3); }
 
-    // ====================== 核心：平滑聚焦动画 ======================
+    // ====================== 聚焦动画 ======================
     function animateFocusChange(newFocusId) {
         if (animationState.isAnimating || !persons.length || newFocusId === focusedPersonId) return;
         
-        if (animationState.rafId) {
-            cancelAnimationFrame(animationState.rafId);
-            animationState.rafId = null;
-        }
+        if (animationState.rafId) cancelAnimationFrame(animationState.rafId);
         
         const currentFocus = focusedPersonId || persons[0].id;
         const currentPos = computePositions(currentFocus);
@@ -260,12 +237,8 @@
         animationState.startPos.clear();
         animationState.targetPos.clear();
         
-        for (const [id, pos] of currentPos) {
-            animationState.startPos.set(id, { x: pos.x, y: pos.y });
-        }
-        for (const [id, pos] of targetPos) {
-            animationState.targetPos.set(id, { x: pos.x, y: pos.y });
-        }
+        for (const [id, pos] of currentPos) animationState.startPos.set(id, { x: pos.x, y: pos.y });
+        for (const [id, pos] of targetPos) animationState.targetPos.set(id, { x: pos.x, y: pos.y });
         
         function animateStep(timestamp) {
             if (!animationState.isAnimating) return;
@@ -283,14 +256,10 @@
                     currentFramePos.set(id, { x: start.x, y: start.y });
                     continue;
                 }
-                
                 let x = start.x + (target.x - start.x) * eased;
                 let y = start.y + (target.y - start.y) * eased;
                 const floatOffset = getFloatOffset(id, id === animationState.currentFocus, now);
-                currentFramePos.set(id, {
-                    x: x + floatOffset.x,
-                    y: y + floatOffset.y
-                });
+                currentFramePos.set(id, { x: x + floatOffset.x, y: y + floatOffset.y });
             }
             
             drawAnimatedFrame(currentFramePos, animationState.currentFocus);
@@ -308,7 +277,6 @@
         animationState.rafId = requestAnimationFrame(animateStep);
     }
 
-    // 动画帧绘制
     function drawAnimatedFrame(posMap, focusId) {
         if (!persons.length) return;
         
@@ -329,7 +297,7 @@
             const isFocusSource = r.sourceId === focusId;
             const isFocusTarget = r.targetId === focusId;
             const lineColor = (isFocusSource || isFocusTarget) ? "#ffcc99" : "#6a5a4e";
-            const lineWidth = (isFocusSource || isFocusTarget) ? 3 : 1.5;
+            const lineWidth = (isFocusSource || isFocusTarget) ? (isMobile() ? 2.5 : 3) : (isMobile() ? 1.2 : 1.8);
             
             drawCurve(ctx, sourcePos.x, sourcePos.y, targetPos.x, targetPos.y, offset, lineColor, lineWidth);
             drawArrowAtEnd(ctx, sourcePos.x, sourcePos.y, targetPos.x, targetPos.y, offset, lineColor);
@@ -339,7 +307,6 @@
             const sourcePos = posMap.get(r.sourceId);
             const targetPos = posMap.get(r.targetId);
             if (!sourcePos || !targetPos || !r.name) return;
-            
             const relLayout = relOffsetMap.get(r.id) || { curve: 10, shift: 0 };
             const offset = relLayout.curve;
             const isFocusSource = r.sourceId === focusId;
@@ -351,13 +318,11 @@
         posMap.forEach((pos, personId) => {
             const person = persons.find(p => p.id === personId);
             if (!person) return;
-            
             const isFocus = personId === focusId;
             const radius = getNodeRadius(isFocus, persons.length);
             
-            ctx.shadowBlur = isFocus ? 12 : 5;
+            ctx.shadowBlur = isFocus ? (isMobile() ? 10 : 16) : (isMobile() ? 4 : 8);
             ctx.shadowColor = `${person.color}80`;
-            ctx.globalAlpha = 1;
             
             const grad = ctx.createRadialGradient(pos.x - 6, pos.y - 6, 4, pos.x, pos.y, radius);
             grad.addColorStop(0, person.color);
@@ -367,22 +332,23 @@
             ctx.arc(pos.x, pos.y, radius, 0, Math.PI * 2);
             ctx.fillStyle = grad;
             ctx.fill();
-            
             ctx.strokeStyle = isFocus ? "#ffdd99" : "#bb9977";
-            ctx.lineWidth = isFocus ? 2.5 : 1.5;
+            ctx.lineWidth = isFocus ? (isMobile() ? 2 : 2.5) : (isMobile() ? 1.2 : 1.8);
             ctx.stroke();
             
-            ctx.font = `bold ${isFocus ? 14 : 11}px "Inter", sans-serif`;
+            const fontSize = isFocus ? (isMobile() ? 13 : 16) : (isMobile() ? 10 : 13);
+            ctx.font = `bold ${fontSize}px "Inter", sans-serif`;
             ctx.fillStyle = "#fff5ea";
             ctx.textAlign = "center";
             ctx.textShadow = "0 1px 2px rgba(0,0,0,0.5)";
-            const displayName = person.name.length > 5 ? person.name.slice(0, 5) + "…" : person.name;
-            ctx.fillText(displayName, pos.x, pos.y + 4);
+            const maxLen = isMobile() ? 5 : 6;
+            const displayName = person.name.length > maxLen ? person.name.slice(0, maxLen) + "…" : person.name;
+            ctx.fillText(displayName, pos.x, pos.y + (isMobile() ? 3 : 5));
             
             if (isFocus) {
-                ctx.font = "12px 'Font Awesome 6 Free', sans-serif";
+                ctx.font = `${isMobile() ? 11 : 14}px "Font Awesome 6 Free", sans-serif`;
                 ctx.fillStyle = "#ffdd99";
-                ctx.fillText("\uf005", pos.x + 18, pos.y - 10);
+                ctx.fillText("\uf005", pos.x + (isMobile() ? 15 : 20), pos.y - (isMobile() ? 8 : 12));
             }
             
             ctx.textAlign = "left";
@@ -390,76 +356,80 @@
         });
         
         ctx.shadowBlur = 0;
-        ctx.shadowColor = "transparent";
     }
 
     // ====================== 核心布局函数 ======================
     function getSourceName(id) { const p = persons.find(x => x.id === id); return p ? p.name : "未知"; }
     function getPersonVisibleRelations(pid) { return relations.filter(r => r.sourceId === pid); }
     
-    // 节点大小（整体缩小）
+    // 节点大小：手机端缩小
     function getNodeRadius(isFocus, total) {
-        if (isFocus) {
-            return Math.max(16, 24 - Math.floor(total / 10));
+        const mobile = isMobile();
+        if (mobile) {
+            if (isFocus) return Math.max(12, 18 - Math.floor(total / 12));
+            return Math.max(7, 12 - Math.floor(total / 14));
+        } else {
+            if (isFocus) return Math.max(22, 30 - Math.floor(total / 8));
+            return Math.max(14, 22 - Math.floor(total / 10));
         }
-        return Math.max(9, 16 - Math.floor(total / 12));
     }
 
-    // 防重叠算法
     function relaxPositions(posMap, focusId, w, h, total) {
         const ids = [...posMap.keys()].filter(i => i !== focusId);
         if (ids.length < 2) return posMap;
-        const min = getNodeRadius(false, total) * 2 + 10;
-        for (let k=0;k<12;k++) {
-            for (let i=0;i<ids.length;i++) {
-                for (let j=i+1;j<ids.length;j++) {
+        const mobile = isMobile();
+        const minDist = getNodeRadius(false, total) * 2 + (mobile ? 8 : 12);
+        
+        for (let k = 0; k < 12; k++) {
+            for (let i = 0; i < ids.length; i++) {
+                for (let j = i + 1; j < ids.length; j++) {
                     const a = posMap.get(ids[i]), b = posMap.get(ids[j]);
                     if (!a || !b) continue;
                     let dx = b.x - a.x, dy = b.y - a.y;
                     let d = Math.hypot(dx, dy);
-                    if (d < 0.001) { dx = Math.random()-0.5; dy = Math.random()-0.5; d = Math.hypot(dx,dy)||1; }
-                    if (d >= min) continue;
-                    const push = (min - d) * 0.4;
-                    a.x -= dx/d * push;
-                    a.y -= dy/d * push;
-                    b.x += dx/d * push;
-                    b.y += dy/d * push;
+                    if (d < 0.001) { dx = Math.random() - 0.5; dy = Math.random() - 0.5; d = Math.hypot(dx, dy) || 1; }
+                    if (d >= minDist) continue;
+                    const push = (minDist - d) * 0.4;
+                    a.x -= dx / d * push;
+                    a.y -= dy / d * push;
+                    b.x += dx / d * push;
+                    b.y += dy / d * push;
                 }
             }
-            ids.forEach(id => { 
-                const p = posMap.get(id); 
-                p.x = Math.min(w - 40, Math.max(40, p.x)); 
-                p.y = Math.min(h - 45, Math.max(45, p.y)); 
+            const margin = mobile ? 30 : 50;
+            ids.forEach(id => {
+                const p = posMap.get(id);
+                p.x = Math.min(w - margin, Math.max(margin, p.x));
+                p.y = Math.min(h - margin, Math.max(margin, p.y));
             });
         }
         return posMap;
     }
 
-    // 位置计算（手机端自动拉大人物间距）
     function computePositions(focusId) {
         const m = new Map();
         const w = canvas.width, h = canvas.height;
         if (!persons.length) return m;
         
         const f = persons.some(p => p.id === focusId) ? focusId : persons[0].id;
-        m.set(f, {x: w/2, y: h/2});
+        m.set(f, { x: w / 2, y: h / 2 });
         
         const others = persons.filter(p => p.id !== f);
         const cnt = others.length;
         if (!cnt) return m;
         
-        // 根据屏幕宽度判断是否为手机端（宽度小于700px）
-        const isMobile = w < 700;
+        const mobile = isMobile();
+        const baseRadius = Math.min(w, h);
         
         let r1, r2;
-        if (isMobile) {
-            // 手机端：半径大幅增加，让人物散开，给关系文字留空间
-            r1 = Math.min(w, h) * 0.42;   // 内圈半径加大
-            r2 = Math.min(w, h) * 0.58;   // 外圈半径加大
+        if (mobile) {
+            // 手机端：半径加大，让人物散开
+            r1 = baseRadius * 0.40;
+            r2 = baseRadius * 0.54;
         } else {
-            // 平板/电脑端：正常半径
-            r1 = Math.min(w, h) * 0.28;
-            r2 = Math.min(w, h) * 0.40;
+            // 电脑端：正常半径
+            r1 = baseRadius * 0.28;
+            r2 = baseRadius * 0.40;
         }
         
         const cap = Math.min(12, cnt);
@@ -470,11 +440,12 @@
             const step = ringCount > 0 ? Math.PI * 2 / ringCount : 0;
             const ang = -Math.PI / 2 + (ring1 ? i : i - cap) * step;
             
-            let x = w/2 + Math.cos(ang) * r;
-            let y = h/2 + Math.sin(ang) * r;
-            x = Math.min(w - 45, Math.max(45, x));
-            y = Math.min(h - 50, Math.max(50, y));
-            m.set(p.id, {x, y});
+            let x = w / 2 + Math.cos(ang) * r;
+            let y = h / 2 + Math.sin(ang) * r;
+            const margin = mobile ? 40 : 60;
+            x = Math.min(w - margin, Math.max(margin, x));
+            y = Math.min(h - margin, Math.max(margin, y));
+            m.set(p.id, { x, y });
         });
         
         return relaxPositions(m, f, w, h, persons.length);
@@ -485,14 +456,19 @@
         if (!f) return { x: 0, y: 0 };
         const t = now * f.speed + f.phase;
         const s = isFocus ? 0.6 : 1;
-        return {x: Math.sin(t)*f.ampX*s, y: Math.cos(t*1.13)*f.ampY*s};
+        const mobile = isMobile();
+        const ampScale = mobile ? 0.7 : 1;
+        return {
+            x: Math.sin(t) * f.ampX * s * ampScale,
+            y: Math.cos(t * 1.13) * f.ampY * s * ampScale
+        };
     }
 
     function applyFloat(base, focus, now) {
         const m = new Map();
-        base.forEach((pos, id) => { 
-            const o = getFloatOffset(id, id===focus, now); 
-            m.set(id, {x:pos.x+o.x, y:pos.y+o.y}); 
+        base.forEach((pos, id) => {
+            const o = getFloatOffset(id, id === focus, now);
+            m.set(id, { x: pos.x + o.x, y: pos.y + o.y });
         });
         return m;
     }
@@ -500,71 +476,105 @@
     function buildOffsetMap(rels) {
         const map = new Map();
         const groups = new Map();
-        rels.forEach(r => { const k = `${r.sourceId}->${r.targetId}`; if (!groups.has(k)) groups.set(k, []); groups.get(k).push(r); });
-        groups.forEach(g => { g.forEach((r,i) => { const lane = i - (g.length-1)/2; map.set(r.id, {curve:8+lane*10, shift:lane*16}); }); });
+        rels.forEach(r => {
+            const k = `${r.sourceId}->${r.targetId}`;
+            if (!groups.has(k)) groups.set(k, []);
+            groups.get(k).push(r);
+        });
+        groups.forEach(g => {
+            g.forEach((r, i) => {
+                const lane = i - (g.length - 1) / 2;
+                const mobile = isMobile();
+                const curveBase = mobile ? 6 : 10;
+                const shiftBase = mobile ? 12 : 20;
+                map.set(r.id, { curve: curveBase + lane * (mobile ? 8 : 12), shift: lane * (mobile ? 12 : 20) });
+            });
+        });
         return map;
     }
 
-    function drawCurve(ctx, fx,fy,tx,ty,off,c,w) {
-        const dx=tx-fx, dy=ty-fy, d=Math.hypot(dx,dy); if (d<1) return;
-        const px=-dy/d, py=dx/d;
-        ctx.beginPath(); ctx.moveTo(fx,fy);
-        ctx.bezierCurveTo(fx+dx*0.33+px*off, fy+dy*0.33+py*off, fx+dx*0.67+px*off, fy+dy*0.67+py*off, tx,ty);
-        ctx.strokeStyle=c; ctx.lineWidth=w; ctx.lineCap='round'; ctx.stroke();
+    function drawCurve(ctx, fx, fy, tx, ty, off, c, w) {
+        const dx = tx - fx, dy = ty - fy, d = Math.hypot(dx, dy);
+        if (d < 1) return;
+        const px = -dy / d, py = dx / d;
+        ctx.beginPath();
+        ctx.moveTo(fx, fy);
+        ctx.bezierCurveTo(fx + dx * 0.33 + px * off, fy + dy * 0.33 + py * off, fx + dx * 0.67 + px * off, fy + dy * 0.67 + py * off, tx, ty);
+        ctx.strokeStyle = c;
+        ctx.lineWidth = w;
+        ctx.lineCap = 'round';
+        ctx.stroke();
     }
 
-    function drawArrowAtEnd(ctx,fx,fy,tx,ty,off,c) {
-        const dx=tx-fx, dy=ty-fy, d=Math.hypot(dx,dy); if (d<1) return;
-        const a = Math.atan2(dy,dx); const px=-dy/d, py=dx/d;
-        const x=tx-12*Math.cos(a)+px*off*0.3; const y=ty-12*Math.sin(a)+py*off*0.3;
-        ctx.save(); ctx.translate(x,y); ctx.rotate(a); ctx.beginPath(); ctx.moveTo(6,0); ctx.lineTo(-4,-3); ctx.lineTo(-4,3); ctx.fillStyle=c; ctx.fill(); ctx.restore();
+    function drawArrowAtEnd(ctx, fx, fy, tx, ty, off, c) {
+        const dx = tx - fx, dy = ty - fy, d = Math.hypot(dx, dy);
+        if (d < 1) return;
+        const a = Math.atan2(dy, dx);
+        const px = -dy / d, py = dx / d;
+        const arrowSize = isMobile() ? 9 : 14;
+        const x = tx - arrowSize * Math.cos(a) + px * off * 0.3;
+        const y = ty - arrowSize * Math.sin(a) + py * off * 0.3;
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.rotate(a);
+        ctx.beginPath();
+        ctx.moveTo(arrowSize * 0.5, 0);
+        ctx.lineTo(-arrowSize * 0.35, -arrowSize * 0.3);
+        ctx.lineTo(-arrowSize * 0.35, arrowSize * 0.3);
+        ctx.fillStyle = c;
+        ctx.fill();
+        ctx.restore();
     }
 
-    function drawRelationName(ctx, t, fx, fy, tx, ty, off, c, shift=0) {
-        const dx=tx-fx, dy=ty-fy, d=Math.hypot(dx,dy); if (d<1||!t) return;
-        const px=-dy/d, py=dx/d, tx_=dx/d, ty_=dy/d;
-        const mx=fx+dx*0.5+px*off+tx_*shift; const my=fy+dy*0.5+py*off+ty_*shift;
-        ctx.font = "10px 'Inter', sans-serif";
+    function drawRelationName(ctx, t, fx, fy, tx, ty, off, c, shift = 0) {
+        const dx = tx - fx, dy = ty - fy, d = Math.hypot(dx, dy);
+        if (d < 1 || !t) return;
+        const px = -dy / d, py = dx / d, tx_ = dx / d, ty_ = dy / d;
+        const mx = fx + dx * 0.5 + px * off + tx_ * shift;
+        const my = fy + dy * 0.5 + py * off + ty_ * shift;
+        const fontSize = isMobile() ? 9 : 11;
+        ctx.font = `${fontSize}px 'Inter', sans-serif`;
         const w = ctx.measureText(t).width;
+        const padding = isMobile() ? 3 : 4;
+        const bgHeight = isMobile() ? 14 : 18;
         ctx.fillStyle = "rgba(0,0,0,0.65)";
         ctx.beginPath();
-        ctx.roundRect(mx - w/2 - 4, my - 8, w + 8, 16, 8);
+        ctx.roundRect(mx - w / 2 - padding, my - bgHeight / 2, w + padding * 2, bgHeight, bgHeight / 2);
         ctx.fill();
         ctx.fillStyle = c;
         ctx.textAlign = "center";
-        ctx.fillText(t, mx, my + 4);
+        ctx.fillText(t, mx, my + 3);
         ctx.textAlign = "left";
     }
 
     if (!CanvasRenderingContext2D.prototype.roundRect) {
         CanvasRenderingContext2D.prototype.roundRect = function(x, y, w, h, r) {
-            r = Math.min(r, w/2, h/2);
-            this.moveTo(x+r, y);
-            this.lineTo(x+w-r, y);
-            this.quadraticCurveTo(x+w, y, x+w, y+r);
-            this.lineTo(x+w, y+h-r);
-            this.quadraticCurveTo(x+w, y+h, x+w-r, y+h);
-            this.lineTo(x+r, y+h);
-            this.quadraticCurveTo(x, y+h, x, y+h-r);
-            this.lineTo(x, y+r);
-            this.quadraticCurveTo(x, y, x+r, y);
+            r = Math.min(r, w / 2, h / 2);
+            this.moveTo(x + r, y);
+            this.lineTo(x + w - r, y);
+            this.quadraticCurveTo(x + w, y, x + w, y + r);
+            this.lineTo(x + w, y + h - r);
+            this.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+            this.lineTo(x + r, y + h);
+            this.quadraticCurveTo(x, y + h, x, y + h - r);
+            this.lineTo(x, y + r);
+            this.quadraticCurveTo(x, y, x + r, y);
             return this;
         };
     }
 
-    // 静态绘图
     function drawGraph() {
         if (animationState.isAnimating) return;
         
         const w = canvas.width, h = canvas.height;
         ctx.clearRect(0, 0, w, h);
-        if (!persons.length) { 
+        if (!persons.length) {
             ctx.font = "16px Inter";
             ctx.fillStyle = "#ccaa88";
             ctx.textAlign = "center";
-            ctx.fillText("加载数据中...", w/2, h/2);
+            ctx.fillText("加载数据中...", w / 2, h / 2);
             ctx.textAlign = "left";
-            return; 
+            return;
         }
         
         const f = focusedPersonId || persons[0].id;
@@ -573,56 +583,59 @@
         let rels = getPersonVisibleRelations(f);
         if (activeFilter) rels = rels.filter(r => r.name === activeFilter);
         const off = buildOffsetMap(rels);
-
-        rels.forEach(r => { 
-            const s = disp.get(r.sourceId), t = disp.get(r.targetId); 
-            if (!s || !t) return; 
-            const o = off.get(r.id)?.curve || 10; 
-            const col = r.sourceId === f || r.targetId === f ? "#ffcc99" : "#6a5a4e"; 
-            drawCurve(ctx, s.x, s.y, t.x, t.y, o, col, r.sourceId === f || r.targetId === f ? 3 : 1.5); 
-            drawArrowAtEnd(ctx, s.x, s.y, t.x, t.y, o, col); 
+        
+        rels.forEach(r => {
+            const s = disp.get(r.sourceId), t = disp.get(r.targetId);
+            if (!s || !t) return;
+            const o = off.get(r.id)?.curve || 10;
+            const col = r.sourceId === f || r.targetId === f ? "#ffcc99" : "#6a5a4e";
+            const lineWidth = (r.sourceId === f || r.targetId === f) ? (isMobile() ? 2.5 : 3) : (isMobile() ? 1.2 : 1.8);
+            drawCurve(ctx, s.x, s.y, t.x, t.y, o, col, lineWidth);
+            drawArrowAtEnd(ctx, s.x, s.y, t.x, t.y, o, col);
         });
         
-        rels.forEach(r => { 
-            const s = disp.get(r.sourceId), t = disp.get(r.targetId); 
-            if (!s || !t || !r.name) return; 
-            const o = off.get(r.id)?.curve || 10; 
-            const sh = off.get(r.id)?.shift || 0; 
-            const col = r.sourceId === f || r.targetId === f ? "#ffdd99" : "#ccaa88"; 
-            drawRelationName(ctx, r.name, s.x, s.y, t.x, t.y, o, col, sh); 
+        rels.forEach(r => {
+            const s = disp.get(r.sourceId), t = disp.get(r.targetId);
+            if (!s || !t || !r.name) return;
+            const o = off.get(r.id)?.curve || 10;
+            const sh = off.get(r.id)?.shift || 0;
+            const col = r.sourceId === f || r.targetId === f ? "#ffdd99" : "#ccaa88";
+            drawRelationName(ctx, r.name, s.x, s.y, t.x, t.y, o, col, sh);
         });
-
+        
         disp.forEach((pos, id) => {
             const p = persons.find(x => x.id === id);
             if (!p) return;
             const isF = id === f;
             const r = getNodeRadius(isF, persons.length);
-            ctx.shadowBlur = isF ? 12 : 5;
+            ctx.shadowBlur = isF ? (isMobile() ? 10 : 16) : (isMobile() ? 4 : 8);
             ctx.shadowColor = p.color + "80";
             
-            const g = ctx.createRadialGradient(pos.x - 6, pos.y - 6, 4, pos.x, pos.y, r);
-            g.addColorStop(0, p.color);
-            g.addColorStop(1, "#2a2340");
+            const grad = ctx.createRadialGradient(pos.x - 6, pos.y - 6, 4, pos.x, pos.y, r);
+            grad.addColorStop(0, p.color);
+            grad.addColorStop(1, "#2a2340");
             
             ctx.beginPath();
             ctx.arc(pos.x, pos.y, r, 0, Math.PI * 2);
-            ctx.fillStyle = g;
+            ctx.fillStyle = grad;
             ctx.fill();
             ctx.strokeStyle = isF ? "#ffdd99" : "#bb9977";
-            ctx.lineWidth = isF ? 2.5 : 1.5;
+            ctx.lineWidth = isF ? (isMobile() ? 2 : 2.5) : (isMobile() ? 1.2 : 1.8);
             ctx.stroke();
             
-            ctx.font = `bold ${isF ? 14 : 11}px Inter`;
+            const fontSize = isF ? (isMobile() ? 13 : 16) : (isMobile() ? 10 : 13);
+            ctx.font = `bold ${fontSize}px Inter`;
             ctx.fillStyle = "#fff5ea";
             ctx.textAlign = "center";
             ctx.textShadow = "0 1px 2px #0008";
-            const n = p.name.length > 5 ? p.name.slice(0, 5) + "…" : p.name;
-            ctx.fillText(n, pos.x, pos.y + 4);
+            const maxLen = isMobile() ? 5 : 6;
+            const n = p.name.length > maxLen ? p.name.slice(0, maxLen) + "…" : p.name;
+            ctx.fillText(n, pos.x, pos.y + (isMobile() ? 3 : 5));
             
             if (isF) {
-                ctx.font = "12px Font Awesome";
+                ctx.font = `${isMobile() ? 11 : 14}px "Font Awesome 6 Free"`;
                 ctx.fillStyle = "#ffdd99";
-                ctx.fillText("\uf005", pos.x + 18, pos.y - 10);
+                ctx.fillText("\uf005", pos.x + (isMobile() ? 15 : 20), pos.y - (isMobile() ? 8 : 12));
             }
             
             ctx.textAlign = "left";
@@ -632,7 +645,6 @@
         ctx.shadowBlur = 0;
     }
 
-    // ====================== 点击交互 ======================
     function onClick(e) {
         if (persons.length === 0 || animationState.isAnimating) return;
         
@@ -649,7 +661,7 @@
         let target = null;
         disp.forEach((pos, id) => {
             const rr = getNodeRadius(id === f, persons.length);
-            if (Math.hypot(x - pos.x, y - pos.y) <= rr + 6) target = id;
+            if (Math.hypot(x - pos.x, y - pos.y) <= rr + 8) target = id;
         });
         
         if (target && target !== focusedPersonId) {
@@ -657,30 +669,29 @@
         }
     }
 
-    // ====================== 筛选 ======================
     function refreshFilter() {
         const box = document.getElementById("filterTags");
         const uniq = [...new Set(relations.map(r => r.name).filter(Boolean))];
-        if (!uniq.length) { 
-            box.innerHTML = "<span style='font-size:12px;opacity:0.6'>暂无关系</span>"; 
-            return; 
+        if (!uniq.length) {
+            box.innerHTML = "<span style='font-size:12px;opacity:0.6'>暂无关系</span>";
+            return;
         }
         box.innerHTML = uniq.map(n => `<div class="filter-tag ${activeFilter === n ? 'active' : ''}" onclick="setFilter('${n.replace(/'/g, "\\'")}')">${n}</div>`).join("");
     }
     
-    function setFilter(n) { 
-        activeFilter = activeFilter === n ? null : n; 
-        refreshFilter(); 
-        drawGraph(); 
+    function setFilter(n) {
+        activeFilter = activeFilter === n ? null : n;
+        refreshFilter();
+        drawGraph();
     }
     
-    function clearFilter() { 
-        activeFilter = null; 
-        refreshFilter(); 
-        drawGraph(); 
+    function clearFilter() {
+        activeFilter = null;
+        refreshFilter();
+        drawGraph();
     }
 
-    // ====================== 樱花特效 ======================
+    // 樱花特效
     const sCanvas = document.getElementById("sakuraCanvas");
     let sCtx = sCanvas.getContext("2d");
     let petals = [];
@@ -749,29 +760,23 @@
         sCanvas.height = innerHeight;
     });
 
-    // ====================== 启动 ======================
     window.setFilter = setFilter;
     window.clearFilter = clearFilter;
     
-    function resizeCanvas() { 
-        canvas.width = window.innerWidth; 
-        canvas.height = window.innerHeight; 
-        drawGraph(); 
+    function resizeCanvas() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        drawGraph();
     }
     
     function handleResize() {
         resizeCanvas();
-        if (persons.length) {
-            drawGraph();
-        }
+        if (persons.length) drawGraph();
     }
     
     function init() {
         resizeCanvas();
         window.addEventListener("resize", handleResize);
-        window.addEventListener("orientationchange", function() {
-            setTimeout(handleResize, 50);
-        });
         canvas.addEventListener("click", onClick);
         document.getElementById("clearFilterBtn").addEventListener("click", clearFilter);
         startSakura();
