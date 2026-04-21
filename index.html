@@ -31,13 +31,10 @@
             background: rgba(25, 22, 40, 0.6);
             cursor: pointer;
         }
+        /* 右侧浮层面板 - 自适应 */
         .float-panel {
             position: fixed;
-            top: 20px;
-            right: 20px;
             z-index: 999;
-            width: 280px;
-            max-height: calc(100vh - 40px);
             background: rgba(20, 18, 35, 0.85);
             backdrop-filter: blur(12px);
             border-radius: 20px;
@@ -45,15 +42,62 @@
             border: 1px solid rgba(255, 180, 150, 0.4);
             color: #f0e6d8;
             overflow-y: auto;
+            pointer-events: auto;
         }
-        @media (max-width: 768px) {
+        /* 横屏：面板固定在右侧 */
+        @media (orientation: landscape) {
             .float-panel {
-                width: calc(100vw - 40px);
-                bottom: 20px;
-                top: auto;
-                left: 20px;
+                top: 20px;
                 right: 20px;
-                max-height: 50vh;
+                width: 280px;
+                max-height: calc(100vh - 40px);
+            }
+        }
+        /* 竖屏：面板固定在底部，水平滚动 */
+        @media (orientation: portrait) {
+            .float-panel {
+                bottom: 0;
+                left: 0;
+                right: 0;
+                width: 100%;
+                max-height: 38vh;
+                border-radius: 20px 20px 0 0;
+                padding: 12px;
+                display: flex;
+                flex-wrap: wrap;
+                gap: 12px;
+            }
+            .float-panel .section {
+                flex: 1;
+                min-width: 120px;
+                margin-bottom: 0;
+                padding-bottom: 0;
+                border-bottom: none;
+            }
+            .float-panel .section-title {
+                font-size: 0.8rem;
+                margin-bottom: 6px;
+            }
+            .filter-group {
+                flex-wrap: wrap;
+                max-height: 80px;
+                overflow-y: auto;
+            }
+            .filter-tag {
+                font-size: 0.7rem;
+                padding: 4px 10px;
+            }
+            .clear-btn {
+                margin-top: 4px;
+                padding: 4px 10px;
+                font-size: 0.7rem;
+            }
+        }
+        /* 竖屏时进一步优化小屏 */
+        @media (orientation: portrait) and (max-height: 700px) {
+            .float-panel {
+                max-height: 42vh;
+                padding: 8px;
             }
         }
         .section {
@@ -69,6 +113,10 @@
         .filter-tag:hover { background: #d47a55; }
         .clear-btn { background: #1e1a32; border: 1px solid #aa7a60; color: #f0e6d8; padding: 6px 12px; border-radius: 30px; font-size: 0.75rem; cursor: pointer; margin-top: 8px; width: 100%; }
         .footer-note { position: fixed; bottom: 12px; left: 50%; transform: translateX(-50%); color: rgba(255,255,255,0.5); font-size: 0.75rem; z-index: 10; white-space: nowrap; pointer-events: none; }
+        /* 竖屏时底部提示需要避开面板 */
+        @media (orientation: portrait) {
+            .footer-note { bottom: calc(38vh + 8px); }
+        }
     </style>
 </head>
 <body>
@@ -100,10 +148,10 @@
         startPos: new Map(),
         targetPos: new Map(),
         progress: 0,
-        duration: 400,  // 动画时长（毫秒），稍微快一点更跟手
+        duration: 400,
         startTime: 0,
         currentFocus: null,
-        rafId: null      // 保存 requestAnimationFrame ID
+        rafId: null
     };
 
     // ====================== 从 GitPages 读取静态 JSON ======================
@@ -143,33 +191,25 @@
 
     // ====================== 核心：平滑聚焦动画 ======================
     function animateFocusChange(newFocusId) {
-        // 边界检查
         if (animationState.isAnimating || !persons.length || newFocusId === focusedPersonId) return;
         
-        // 停止之前的动画（如果有）
         if (animationState.rafId) {
             cancelAnimationFrame(animationState.rafId);
             animationState.rafId = null;
         }
         
-        // 获取当前聚焦（如果没有则用第一个）
         const currentFocus = focusedPersonId || persons[0].id;
-        
-        // 获取起始位置和目标位置
         const currentPos = computePositions(currentFocus);
         const targetPos = computePositions(newFocusId);
         
-        // 验证位置是否有效
         if (currentPos.size === 0 || targetPos.size === 0) return;
         
-        // 保存动画状态
         animationState.isAnimating = true;
         animationState.startTime = performance.now();
         animationState.currentFocus = newFocusId;
         animationState.startPos.clear();
         animationState.targetPos.clear();
         
-        // 复制位置数据（深拷贝）
         for (const [id, pos] of currentPos) {
             animationState.startPos.set(id, { x: pos.x, y: pos.y });
         }
@@ -177,7 +217,6 @@
             animationState.targetPos.set(id, { x: pos.x, y: pos.y });
         }
         
-        // 启动动画
         function animateStep(timestamp) {
             if (!animationState.isAnimating) return;
             
@@ -185,7 +224,6 @@
             let progress = Math.min(elapsed / animationState.duration, 1);
             const eased = easeOutCubic(progress);
             
-            // 计算当前帧的位置（起始→目标 插值）
             const currentFramePos = new Map();
             const now = performance.now();
             
@@ -196,11 +234,8 @@
                     continue;
                 }
                 
-                // 插值
                 let x = start.x + (target.x - start.x) * eased;
                 let y = start.y + (target.y - start.y) * eased;
-                
-                // 叠加浮动动画（让动画过程中也有微飘动，更自然）
                 const floatOffset = getFloatOffset(id, id === animationState.currentFocus, now);
                 currentFramePos.set(id, {
                     x: x + floatOffset.x,
@@ -208,15 +243,13 @@
                 });
             }
             
-            // 绘制当前帧
             drawAnimatedFrame(currentFramePos, animationState.currentFocus);
             
             if (progress >= 1) {
-                // 动画完成
                 animationState.isAnimating = false;
                 focusedPersonId = animationState.currentFocus;
                 animationState.rafId = null;
-                drawGraph(); // 绘制最终精确帧
+                drawGraph();
             } else {
                 animationState.rafId = requestAnimationFrame(animateStep);
             }
@@ -225,19 +258,17 @@
         animationState.rafId = requestAnimationFrame(animateStep);
     }
 
-    // 动画帧绘制（不依赖全局 focusedPersonId）
+    // 动画帧绘制
     function drawAnimatedFrame(posMap, focusId) {
         if (!persons.length) return;
         
         const w = canvas.width, h = canvas.height;
         ctx.clearRect(0, 0, w, h);
         
-        // 获取需要绘制的关系
         let relsToDraw = getPersonVisibleRelations(focusId);
         if (activeFilter) relsToDraw = relsToDraw.filter(r => r.name === activeFilter);
         const relOffsetMap = buildOffsetMap(relsToDraw);
         
-        // 1. 绘制关系线和箭头
         relsToDraw.forEach(r => {
             const sourcePos = posMap.get(r.sourceId);
             const targetPos = posMap.get(r.targetId);
@@ -254,7 +285,6 @@
             drawArrowAtEnd(ctx, sourcePos.x, sourcePos.y, targetPos.x, targetPos.y, offset, lineColor);
         });
         
-        // 2. 绘制关系文字
         relsToDraw.forEach(r => {
             const sourcePos = posMap.get(r.sourceId);
             const targetPos = posMap.get(r.targetId);
@@ -268,7 +298,6 @@
             drawRelationName(ctx, r.name, sourcePos.x, sourcePos.y, targetPos.x, targetPos.y, offset, textColor, relLayout.shift);
         });
         
-        // 3. 绘制人物节点
         posMap.forEach((pos, personId) => {
             const person = persons.find(p => p.id === personId);
             if (!person) return;
@@ -280,7 +309,6 @@
             ctx.shadowColor = `${person.color}80`;
             ctx.globalAlpha = 1;
             
-            // 渐变圆
             const grad = ctx.createRadialGradient(pos.x - 8, pos.y - 8, 5, pos.x, pos.y, radius);
             grad.addColorStop(0, person.color);
             grad.addColorStop(1, "#2a2340");
@@ -290,12 +318,10 @@
             ctx.fillStyle = grad;
             ctx.fill();
             
-            // 描边
             ctx.strokeStyle = isFocus ? "#ffdd99" : "#bb9977";
             ctx.lineWidth = isFocus ? 3 : 2;
             ctx.stroke();
             
-            // 文字
             ctx.font = `bold ${isFocus ? 17 : 14}px "Inter", sans-serif`;
             ctx.fillStyle = "#fff5ea";
             ctx.textAlign = "center";
@@ -303,7 +329,6 @@
             const displayName = person.name.length > 4 ? person.name.slice(0, 4) + "..." : person.name;
             ctx.fillText(displayName, pos.x, pos.y + 5);
             
-            // 聚焦星标
             if (isFocus) {
                 ctx.font = "16px 'Font Awesome 6 Free', sans-serif";
                 ctx.fillStyle = "#ffdd99";
@@ -318,15 +343,26 @@
         ctx.shadowColor = "transparent";
     }
 
-    // ====================== 原有绘图逻辑 ======================
+    // ====================== 核心布局函数（竖屏自适应）======================
     function getSourceName(id) { const p = persons.find(x => x.id === id); return p ? p.name : "未知"; }
     function getPersonVisibleRelations(pid) { return relations.filter(r => r.sourceId === pid); }
-    function getNodeRadius(isFocus, total) { return isFocus ? Math.max(30, 38 - Math.floor(total/8)) : Math.max(20, 28 - Math.floor(total/10)); }
+    
+    // 节点大小自适应屏幕方向
+    function getNodeRadius(isFocus, total) {
+        const isPortrait = window.innerHeight > window.innerWidth;
+        const baseScale = isPortrait ? 0.65 : 1;
+        
+        if (isFocus) {
+            return Math.max(20, 32 - Math.floor(total / 8)) * baseScale;
+        }
+        return Math.max(12, 22 - Math.floor(total / 10)) * baseScale;
+    }
 
+    // 防重叠算法
     function relaxPositions(posMap, focusId, w, h, total) {
         const ids = [...posMap.keys()].filter(i => i !== focusId);
         if (ids.length < 2) return posMap;
-        const min = getNodeRadius(false, total) * 2 + 12;
+        const min = getNodeRadius(false, total) * 2 + 10;
         for (let k=0;k<10;k++) {
             for (let i=0;i<ids.length;i++) {
                 for (let j=i+1;j<ids.length;j++) {
@@ -341,32 +377,53 @@
                     b.x += dx/d*push; b.y += dy/d*push;
                 }
             }
-            ids.forEach(id => { const p = posMap.get(id); p.x = Math.min(w-50, Math.max(50, p.x)); p.y = Math.min(h-50, Math.max(50, p.y)); });
+            ids.forEach(id => { const p = posMap.get(id); p.x = Math.min(w-40, Math.max(40, p.x)); p.y = Math.min(h-50, Math.max(50, p.y)); });
         }
         return posMap;
     }
 
+    // 核心位置计算（竖屏时缩小环绕半径）
     function computePositions(focusId) {
         const m = new Map();
         const w = canvas.width, h = canvas.height;
         if (!persons.length) return m;
+        
         const f = persons.some(p => p.id === focusId) ? focusId : persons[0].id;
-        m.set(f, {x:w/2, y:h/2});
+        m.set(f, {x: w/2, y: h/2});
+        
         const others = persons.filter(p => p.id !== f);
         const cnt = others.length;
         if (!cnt) return m;
-        const r1 = Math.min(w,h)*0.28, r2 = Math.min(w,h)*0.4;
+        
+        // 根据屏幕方向动态调整半径
+        const isPortrait = h > w;
+        const baseRadius = Math.min(w, h);
+        
+        let r1, r2;
+        if (isPortrait) {
+            // 竖屏：半径缩小，避免重叠
+            r1 = baseRadius * 0.22;
+            r2 = baseRadius * 0.32;
+        } else {
+            // 横屏：正常半径
+            r1 = baseRadius * 0.28;
+            r2 = baseRadius * 0.4;
+        }
+        
         const cap = Math.min(10, cnt);
-        others.forEach((p,i) => {
+        others.forEach((p, i) => {
             const ring1 = i < cap;
             const r = ring1 ? r1 : r2;
-            const step = Math.PI*2/(ring1 ? cap : cnt-cap);
-            const ang = -Math.PI/2 + (ring1 ? i : i-cap)*step;
-            m.set(p.id, {
-                x: Math.min(w-50, Math.max(50, w/2 + Math.cos(ang)*r)),
-                y: Math.min(h-50, Math.max(50, h/2 + Math.sin(ang)*r))
-            });
+            const step = Math.PI * 2 / (ring1 ? cap : cnt - cap);
+            const ang = -Math.PI / 2 + (ring1 ? i : i - cap) * step;
+            
+            let x = w/2 + Math.cos(ang) * r;
+            let y = h/2 + Math.sin(ang) * r;
+            x = Math.min(w - 40, Math.max(40, x));
+            y = Math.min(h - 50, Math.max(50, y));
+            m.set(p.id, {x, y});
         });
+        
         return relaxPositions(m, f, w, h, persons.length);
     }
 
@@ -375,7 +432,8 @@
         if (!f) return { x: 0, y: 0 };
         const t = now * f.speed + f.phase;
         const s = isFocus ? 0.7 : 1;
-        return {x: Math.sin(t)*f.ampX*s, y: Math.cos(t*1.13)*f.ampY*s};
+        const scale = (window.innerHeight > window.innerWidth) ? 0.5 : 1;
+        return {x: Math.sin(t)*f.ampX*s*scale, y: Math.cos(t*1.13)*f.ampY*s*scale};
     }
 
     function applyFloat(base, focus, now) {
@@ -429,7 +487,7 @@
         };
     }
 
-    // 静态绘图（非动画时使用）
+    // 静态绘图
     function drawGraph() {
         if (animationState.isAnimating) return;
         
@@ -446,7 +504,6 @@
         if (activeFilter) rels = rels.filter(r=>r.name===activeFilter);
         const off = buildOffsetMap(rels);
 
-        // 绘制关系线和箭头
         rels.forEach(r=>{ 
             const s=disp.get(r.sourceId), t=disp.get(r.targetId); 
             if (!s||!t) return; 
@@ -456,7 +513,6 @@
             drawArrowAtEnd(ctx,s.x,s.y,t.x,t.y,o,col); 
         });
         
-        // 绘制关系文字
         rels.forEach(r=>{ 
             const s=disp.get(r.sourceId), t=disp.get(r.targetId); 
             if (!s||!t||!r.name) return; 
@@ -466,7 +522,6 @@
             drawRelationName(ctx,r.name,s.x,s.y,t.x,t.y,o,col,sh); 
         });
 
-        // 绘制人物节点
         disp.forEach((pos,id)=>{
             const p=persons.find(x=>x.id===id); if (!p) return;
             const isF=id===f; const r=getNodeRadius(isF,persons.length);
@@ -489,7 +544,7 @@
         ctx.shadowBlur=0;
     }
 
-    // ====================== 点击交互（触发动画）======================
+    // ====================== 点击交互 ======================
     function onClick(e) {
         if (persons.length === 0 || animationState.isAnimating) return;
         
@@ -507,7 +562,6 @@
             if (Math.hypot(x - pos.x, y - pos.y) <= rr + 5) target = id; 
         });
         
-        // 触发平滑动画
         if (target && target !== focusedPersonId) {
             animateFocusChange(target);
         }
@@ -605,9 +659,19 @@
         drawGraph(); 
     }
     
+    function handleResize() {
+        resizeCanvas();
+        if (persons.length) {
+            drawGraph();
+        }
+    }
+    
     function init() {
         resizeCanvas();
-        window.addEventListener("resize", resizeCanvas);
+        window.addEventListener("resize", handleResize);
+        window.addEventListener("orientationchange", function() {
+            setTimeout(handleResize, 50);
+        });
         canvas.addEventListener("click", onClick);
         document.getElementById("clearFilterBtn").addEventListener("click", clearFilter);
         startSakura();
