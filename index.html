@@ -10,11 +10,27 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'Inter', sans-serif;
-            min-height: 100vh;
             background: linear-gradient(145deg, #1a1a2e 0%, #0d0d1a 100%);
-            overflow-x: hidden;
-            position: relative;
+            overflow: hidden;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
         }
+        
+        /* 强制横屏：把整个页面旋转90度 */
+        .rotate-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vh;
+            height: 100vw;
+            transform-origin: 0 0;
+            transform: rotate(90deg) translateY(-100%);
+        }
+        
+        /* 樱花画布 */
         #sakuraCanvas {
             position: fixed;
             top: 0;
@@ -24,18 +40,53 @@
             pointer-events: none;
             z-index: 1;
         }
+        
+        /* 关系图画布 */
         #graphCanvas {
             display: block;
-            width: 100vw;
-            height: 100vh;
+            width: 100%;
+            height: 100%;
             background: rgba(25, 22, 40, 0.6);
             cursor: pointer;
         }
-        /* 右侧浮层面板 - 自适应 */
+        
+        /* 悬浮筛选按钮 */
+        .filter-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+            width: 52px;
+            height: 52px;
+            border-radius: 26px;
+            background: #b86b4a;
+            border: none;
+            color: white;
+            font-size: 22px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .filter-btn:hover {
+            background: #d47a55;
+            transform: scale(1.05);
+        }
+        .filter-btn i {
+            font-size: 22px;
+        }
+        
+        /* 右侧浮层面板 - 默认隐藏 */
         .float-panel {
             position: fixed;
+            top: 20px;
+            right: 20px;
             z-index: 999;
-            background: rgba(20, 18, 35, 0.85);
+            width: 260px;
+            max-height: calc(100vh - 40px);
+            background: rgba(20, 18, 35, 0.92);
             backdrop-filter: blur(12px);
             border-radius: 20px;
             padding: 16px;
@@ -43,96 +94,95 @@
             color: #f0e6d8;
             overflow-y: auto;
             pointer-events: auto;
+            transform: translateX(320px);
+            transition: transform 0.3s ease;
+            opacity: 0;
+            visibility: hidden;
         }
-        /* 横屏：面板固定在右侧 */
-        @media (orientation: landscape) {
-            .float-panel {
-                top: 20px;
-                right: 20px;
-                width: 280px;
-                max-height: calc(100vh - 40px);
-            }
+        .float-panel.show {
+            transform: translateX(0);
+            opacity: 1;
+            visibility: visible;
         }
-        /* 竖屏：面板固定在底部，水平滚动 */
-        @media (orientation: portrait) {
-            .float-panel {
-                bottom: 0;
-                left: 0;
-                right: 0;
-                width: 100%;
-                max-height: 38vh;
-                border-radius: 20px 20px 0 0;
-                padding: 12px;
-                display: flex;
-                flex-wrap: wrap;
-                gap: 12px;
-            }
-            .float-panel .section {
-                flex: 1;
-                min-width: 120px;
-                margin-bottom: 0;
-                padding-bottom: 0;
-                border-bottom: none;
-            }
-            .float-panel .section-title {
-                font-size: 0.8rem;
-                margin-bottom: 6px;
-            }
-            .filter-group {
-                flex-wrap: wrap;
-                max-height: 80px;
-                overflow-y: auto;
-            }
-            .filter-tag {
-                font-size: 0.7rem;
-                padding: 4px 10px;
-            }
-            .clear-btn {
-                margin-top: 4px;
-                padding: 4px 10px;
-                font-size: 0.7rem;
-            }
+        
+        /* 关闭按钮 */
+        .panel-close {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: none;
+            border: none;
+            color: #ffaa88;
+            font-size: 18px;
+            cursor: pointer;
+            padding: 4px;
         }
-        /* 竖屏时进一步优化小屏 */
-        @media (orientation: portrait) and (max-height: 700px) {
-            .float-panel {
-                max-height: 42vh;
-                padding: 8px;
-            }
+        .panel-close:hover {
+            color: white;
         }
+        
         .section {
             margin-bottom: 12px;
             padding-bottom: 12px;
             border-bottom: 1px solid rgba(255, 180, 140, 0.2);
         }
         .section:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
-        .section-title { font-size: 0.95rem; font-weight: 600; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+        .section-title { font-size: 0.9rem; font-weight: 600; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
         .filter-group { display: flex; flex-wrap: wrap; gap: 6px; }
-        .filter-tag { background: #2a2545; padding: 5px 12px; border-radius: 30px; font-size: 0.75rem; cursor: pointer; transition: 0.2s; white-space: nowrap; }
+        .filter-tag { background: #2a2545; padding: 5px 12px; border-radius: 30px; font-size: 0.7rem; cursor: pointer; transition: 0.2s; white-space: nowrap; }
         .filter-tag.active { background: #b86b4a; color: #fff; }
         .filter-tag:hover { background: #d47a55; }
-        .clear-btn { background: #1e1a32; border: 1px solid #aa7a60; color: #f0e6d8; padding: 6px 12px; border-radius: 30px; font-size: 0.75rem; cursor: pointer; margin-top: 8px; width: 100%; }
-        .footer-note { position: fixed; bottom: 12px; left: 50%; transform: translateX(-50%); color: rgba(255,255,255,0.5); font-size: 0.75rem; z-index: 10; white-space: nowrap; pointer-events: none; }
-        /* 竖屏时底部提示需要避开面板 */
-        @media (orientation: portrait) {
-            .footer-note { bottom: calc(38vh + 8px); }
-        }
+        .clear-btn { background: #1e1a32; border: 1px solid #aa7a60; color: #f0e6d8; padding: 6px 12px; border-radius: 30px; font-size: 0.7rem; cursor: pointer; margin-top: 8px; width: 100%; }
+        .footer-note { position: fixed; bottom: 12px; left: 50%; transform: translateX(-50%); color: rgba(255,255,255,0.5); font-size: 0.7rem; z-index: 10; white-space: nowrap; pointer-events: none; }
     </style>
 </head>
 <body>
-<canvas id="sakuraCanvas"></canvas>
-<canvas id="graphCanvas"></canvas>
-
-<div class="float-panel">
-    <div class="section">
-        <div class="section-title"><i class="fas fa-filter"></i> 关系筛选</div>
-        <div id="filterTags" class="filter-group"></div>
-        <button id="clearFilterBtn" class="clear-btn">清除筛选</button>
+<div class="rotate-container">
+    <canvas id="sakuraCanvas"></canvas>
+    <canvas id="graphCanvas"></canvas>
+    
+    <button class="filter-btn" id="filterToggleBtn">
+        <i class="fas fa-filter"></i>
+    </button>
+    
+    <div class="float-panel" id="floatPanel">
+        <button class="panel-close" id="panelCloseBtn">
+            <i class="fas fa-times"></i>
+        </button>
+        <div class="section">
+            <div class="section-title"><i class="fas fa-filter"></i> 关系筛选</div>
+            <div id="filterTags" class="filter-group"></div>
+            <button id="clearFilterBtn" class="clear-btn">清除筛选</button>
+        </div>
     </div>
+    <div class="footer-note"><i class="fas fa-hand-pointer"></i> 点击圆点切换人物视角</div>
 </div>
-<div class="footer-note"><i class="fas fa-hand-pointer"></i> 点击圆点切换人物视角</div>
 
 <script>
+    // ====================== 面板隐藏/显示 ======================
+    const filterBtn = document.getElementById('filterToggleBtn');
+    const floatPanel = document.getElementById('floatPanel');
+    const panelClose = document.getElementById('panelCloseBtn');
+    
+    function togglePanel() {
+        floatPanel.classList.toggle('show');
+    }
+    
+    function hidePanel() {
+        floatPanel.classList.remove('show');
+    }
+    
+    filterBtn.addEventListener('click', togglePanel);
+    panelClose.addEventListener('click', hidePanel);
+    document.addEventListener('click', function(e) {
+        if (floatPanel.classList.contains('show') && 
+            !floatPanel.contains(e.target) && 
+            e.target !== filterBtn && 
+            !filterBtn.contains(e.target)) {
+            hidePanel();
+        }
+    });
+
     // ====================== 全局变量 ======================
     let persons = [];
     let relations = [];
@@ -170,8 +220,8 @@
                 floatState.set(p.id, {
                     phase: Math.random() * Math.PI * 2,
                     speed: 0.0012 + Math.random() * 0.001,
-                    ampX: 1.8 + Math.random() * 1.6,
-                    ampY: 2.0 + Math.random() * 1.8
+                    ampX: 1.2 + Math.random() * 1.0,
+                    ampY: 1.4 + Math.random() * 1.2
                 });
             });
 
@@ -279,7 +329,7 @@
             const isFocusSource = r.sourceId === focusId;
             const isFocusTarget = r.targetId === focusId;
             const lineColor = (isFocusSource || isFocusTarget) ? "#ffcc99" : "#6a5a4e";
-            const lineWidth = (isFocusSource || isFocusTarget) ? 3.5 : 1.8;
+            const lineWidth = (isFocusSource || isFocusTarget) ? 3 : 1.5;
             
             drawCurve(ctx, sourcePos.x, sourcePos.y, targetPos.x, targetPos.y, offset, lineColor, lineWidth);
             drawArrowAtEnd(ctx, sourcePos.x, sourcePos.y, targetPos.x, targetPos.y, offset, lineColor);
@@ -305,11 +355,11 @@
             const isFocus = personId === focusId;
             const radius = getNodeRadius(isFocus, persons.length);
             
-            ctx.shadowBlur = isFocus ? 18 : 8;
+            ctx.shadowBlur = isFocus ? 12 : 5;
             ctx.shadowColor = `${person.color}80`;
             ctx.globalAlpha = 1;
             
-            const grad = ctx.createRadialGradient(pos.x - 8, pos.y - 8, 5, pos.x, pos.y, radius);
+            const grad = ctx.createRadialGradient(pos.x - 6, pos.y - 6, 4, pos.x, pos.y, radius);
             grad.addColorStop(0, person.color);
             grad.addColorStop(1, "#2a2340");
             
@@ -319,20 +369,20 @@
             ctx.fill();
             
             ctx.strokeStyle = isFocus ? "#ffdd99" : "#bb9977";
-            ctx.lineWidth = isFocus ? 3 : 2;
+            ctx.lineWidth = isFocus ? 2.5 : 1.5;
             ctx.stroke();
             
-            ctx.font = `bold ${isFocus ? 17 : 14}px "Inter", sans-serif`;
+            ctx.font = `bold ${isFocus ? 14 : 11}px "Inter", sans-serif`;
             ctx.fillStyle = "#fff5ea";
             ctx.textAlign = "center";
             ctx.textShadow = "0 1px 2px rgba(0,0,0,0.5)";
-            const displayName = person.name.length > 4 ? person.name.slice(0, 4) + "..." : person.name;
-            ctx.fillText(displayName, pos.x, pos.y + 5);
+            const displayName = person.name.length > 5 ? person.name.slice(0, 5) + "…" : person.name;
+            ctx.fillText(displayName, pos.x, pos.y + 4);
             
             if (isFocus) {
-                ctx.font = "16px 'Font Awesome 6 Free', sans-serif";
+                ctx.font = "12px 'Font Awesome 6 Free', sans-serif";
                 ctx.fillStyle = "#ffdd99";
-                ctx.fillText("\uf005", pos.x + 22, pos.y - 14);
+                ctx.fillText("\uf005", pos.x + 18, pos.y - 10);
             }
             
             ctx.textAlign = "left";
@@ -343,19 +393,16 @@
         ctx.shadowColor = "transparent";
     }
 
-    // ====================== 核心布局函数（竖屏自适应）======================
+    // ====================== 核心布局函数 ======================
     function getSourceName(id) { const p = persons.find(x => x.id === id); return p ? p.name : "未知"; }
     function getPersonVisibleRelations(pid) { return relations.filter(r => r.sourceId === pid); }
     
-    // 节点大小自适应屏幕方向
+    // 节点大小（整体缩小）
     function getNodeRadius(isFocus, total) {
-        const isPortrait = window.innerHeight > window.innerWidth;
-        const baseScale = isPortrait ? 0.65 : 1;
-        
         if (isFocus) {
-            return Math.max(20, 32 - Math.floor(total / 8)) * baseScale;
+            return Math.max(16, 24 - Math.floor(total / 10));
         }
-        return Math.max(12, 22 - Math.floor(total / 10)) * baseScale;
+        return Math.max(9, 16 - Math.floor(total / 12));
     }
 
     // 防重叠算法
@@ -363,7 +410,7 @@
         const ids = [...posMap.keys()].filter(i => i !== focusId);
         if (ids.length < 2) return posMap;
         const min = getNodeRadius(false, total) * 2 + 10;
-        for (let k=0;k<10;k++) {
+        for (let k=0;k<12;k++) {
             for (let i=0;i<ids.length;i++) {
                 for (let j=i+1;j<ids.length;j++) {
                     const a = posMap.get(ids[i]), b = posMap.get(ids[j]);
@@ -372,17 +419,23 @@
                     let d = Math.hypot(dx, dy);
                     if (d < 0.001) { dx = Math.random()-0.5; dy = Math.random()-0.5; d = Math.hypot(dx,dy)||1; }
                     if (d >= min) continue;
-                    const push = (min - d)*0.5;
-                    a.x -= dx/d*push; a.y -= dy/d*push;
-                    b.x += dx/d*push; b.y += dy/d*push;
+                    const push = (min - d) * 0.4;
+                    a.x -= dx/d * push;
+                    a.y -= dy/d * push;
+                    b.x += dx/d * push;
+                    b.y += dy/d * push;
                 }
             }
-            ids.forEach(id => { const p = posMap.get(id); p.x = Math.min(w-40, Math.max(40, p.x)); p.y = Math.min(h-50, Math.max(50, p.y)); });
+            ids.forEach(id => { 
+                const p = posMap.get(id); 
+                p.x = Math.min(w - 40, Math.max(40, p.x)); 
+                p.y = Math.min(h - 45, Math.max(45, p.y)); 
+            });
         }
         return posMap;
     }
 
-    // 核心位置计算（竖屏时缩小环绕半径）
+    // 位置计算（手机端自动拉大人物间距）
     function computePositions(focusId) {
         const m = new Map();
         const w = canvas.width, h = canvas.height;
@@ -395,31 +448,31 @@
         const cnt = others.length;
         if (!cnt) return m;
         
-        // 根据屏幕方向动态调整半径
-        const isPortrait = h > w;
-        const baseRadius = Math.min(w, h);
+        // 根据屏幕宽度判断是否为手机端（宽度小于700px）
+        const isMobile = w < 700;
         
         let r1, r2;
-        if (isPortrait) {
-            // 竖屏：半径缩小，避免重叠
-            r1 = baseRadius * 0.22;
-            r2 = baseRadius * 0.32;
+        if (isMobile) {
+            // 手机端：半径大幅增加，让人物散开，给关系文字留空间
+            r1 = Math.min(w, h) * 0.42;   // 内圈半径加大
+            r2 = Math.min(w, h) * 0.58;   // 外圈半径加大
         } else {
-            // 横屏：正常半径
-            r1 = baseRadius * 0.28;
-            r2 = baseRadius * 0.4;
+            // 平板/电脑端：正常半径
+            r1 = Math.min(w, h) * 0.28;
+            r2 = Math.min(w, h) * 0.40;
         }
         
-        const cap = Math.min(10, cnt);
+        const cap = Math.min(12, cnt);
         others.forEach((p, i) => {
             const ring1 = i < cap;
             const r = ring1 ? r1 : r2;
-            const step = Math.PI * 2 / (ring1 ? cap : cnt - cap);
+            const ringCount = ring1 ? cap : cnt - cap;
+            const step = ringCount > 0 ? Math.PI * 2 / ringCount : 0;
             const ang = -Math.PI / 2 + (ring1 ? i : i - cap) * step;
             
             let x = w/2 + Math.cos(ang) * r;
             let y = h/2 + Math.sin(ang) * r;
-            x = Math.min(w - 40, Math.max(40, x));
+            x = Math.min(w - 45, Math.max(45, x));
             y = Math.min(h - 50, Math.max(50, y));
             m.set(p.id, {x, y});
         });
@@ -431,9 +484,8 @@
         const f = floatState.get(pid);
         if (!f) return { x: 0, y: 0 };
         const t = now * f.speed + f.phase;
-        const s = isFocus ? 0.7 : 1;
-        const scale = (window.innerHeight > window.innerWidth) ? 0.5 : 1;
-        return {x: Math.sin(t)*f.ampX*s*scale, y: Math.cos(t*1.13)*f.ampY*s*scale};
+        const s = isFocus ? 0.6 : 1;
+        return {x: Math.sin(t)*f.ampX*s, y: Math.cos(t*1.13)*f.ampY*s};
     }
 
     function applyFloat(base, focus, now) {
@@ -449,7 +501,7 @@
         const map = new Map();
         const groups = new Map();
         rels.forEach(r => { const k = `${r.sourceId}->${r.targetId}`; if (!groups.has(k)) groups.set(k, []); groups.get(k).push(r); });
-        groups.forEach(g => { g.forEach((r,i) => { const lane = i - (g.length-1)/2; map.set(r.id, {curve:10+lane*12, shift:lane*20}); }); });
+        groups.forEach(g => { g.forEach((r,i) => { const lane = i - (g.length-1)/2; map.set(r.id, {curve:8+lane*10, shift:lane*16}); }); });
         return map;
     }
 
@@ -464,26 +516,39 @@
     function drawArrowAtEnd(ctx,fx,fy,tx,ty,off,c) {
         const dx=tx-fx, dy=ty-fy, d=Math.hypot(dx,dy); if (d<1) return;
         const a = Math.atan2(dy,dx); const px=-dy/d, py=dx/d;
-        const x=tx-16*Math.cos(a)+px*off*0.3; const y=ty-16*Math.sin(a)+py*off*0.3;
-        ctx.save(); ctx.translate(x,y); ctx.rotate(a); ctx.beginPath(); ctx.moveTo(8,0); ctx.lineTo(-5,-4); ctx.lineTo(-5,4); ctx.fillStyle=c; ctx.fill(); ctx.restore();
+        const x=tx-12*Math.cos(a)+px*off*0.3; const y=ty-12*Math.sin(a)+py*off*0.3;
+        ctx.save(); ctx.translate(x,y); ctx.rotate(a); ctx.beginPath(); ctx.moveTo(6,0); ctx.lineTo(-4,-3); ctx.lineTo(-4,3); ctx.fillStyle=c; ctx.fill(); ctx.restore();
     }
 
-    function drawRelationName(ctx,t,fx,fy,tx,ty,off,c,shift=0) {
+    function drawRelationName(ctx, t, fx, fy, tx, ty, off, c, shift=0) {
         const dx=tx-fx, dy=ty-fy, d=Math.hypot(dx,dy); if (d<1||!t) return;
         const px=-dy/d, py=dx/d, tx_=dx/d, ty_=dy/d;
         const mx=fx+dx*0.5+px*off+tx_*shift; const my=fy+dy*0.5+py*off+ty_*shift;
-        ctx.font="11px Inter"; const w=ctx.measureText(t).width;
-        ctx.fillStyle="rgba(0,0,0,0.7)"; ctx.beginPath(); ctx.roundRect(mx-w/2-5,my-9,w+10,18,10); ctx.fill();
-        ctx.fillStyle=c; ctx.textAlign="center"; ctx.fillText(t,mx,my+4); ctx.textAlign="left";
+        ctx.font = "10px 'Inter', sans-serif";
+        const w = ctx.measureText(t).width;
+        ctx.fillStyle = "rgba(0,0,0,0.65)";
+        ctx.beginPath();
+        ctx.roundRect(mx - w/2 - 4, my - 8, w + 8, 16, 8);
+        ctx.fill();
+        ctx.fillStyle = c;
+        ctx.textAlign = "center";
+        ctx.fillText(t, mx, my + 4);
+        ctx.textAlign = "left";
     }
 
     if (!CanvasRenderingContext2D.prototype.roundRect) {
-        CanvasRenderingContext2D.prototype.roundRect=function(x,y,w,h,r){
-            r=Math.min(r,w/2,h/2); this.moveTo(x+r,y); this.lineTo(x+w-r,y);
-            this.quadraticCurveTo(x+w,y,x+w,y+r); this.lineTo(x+w,y+h-r);
-            this.quadraticCurveTo(x+w,y+h,x+w-r,y+h); this.lineTo(x+r,y+h);
-            this.quadraticCurveTo(x,y+h,x,y+h-r); this.lineTo(x,y+r);
-            this.quadraticCurveTo(x,y,x+r,y); return this;
+        CanvasRenderingContext2D.prototype.roundRect = function(x, y, w, h, r) {
+            r = Math.min(r, w/2, h/2);
+            this.moveTo(x+r, y);
+            this.lineTo(x+w-r, y);
+            this.quadraticCurveTo(x+w, y, x+w, y+r);
+            this.lineTo(x+w, y+h-r);
+            this.quadraticCurveTo(x+w, y+h, x+w-r, y+h);
+            this.lineTo(x+r, y+h);
+            this.quadraticCurveTo(x, y+h, x, y+h-r);
+            this.lineTo(x, y+r);
+            this.quadraticCurveTo(x, y, x+r, y);
+            return this;
         };
     }
 
@@ -491,75 +556,100 @@
     function drawGraph() {
         if (animationState.isAnimating) return;
         
-        const w=canvas.width, h=canvas.height; ctx.clearRect(0,0,w,h);
+        const w = canvas.width, h = canvas.height;
+        ctx.clearRect(0, 0, w, h);
         if (!persons.length) { 
-            ctx.font="16px Inter"; ctx.fillStyle="#ccaa88"; ctx.textAlign="center"; 
-            ctx.fillText("加载数据中...",w/2,h/2); ctx.textAlign="left"; return; 
+            ctx.font = "16px Inter";
+            ctx.fillStyle = "#ccaa88";
+            ctx.textAlign = "center";
+            ctx.fillText("加载数据中...", w/2, h/2);
+            ctx.textAlign = "left";
+            return; 
         }
         
         const f = focusedPersonId || persons[0].id;
         const base = computePositions(f);
         const disp = applyFloat(base, f, performance.now());
         let rels = getPersonVisibleRelations(f);
-        if (activeFilter) rels = rels.filter(r=>r.name===activeFilter);
+        if (activeFilter) rels = rels.filter(r => r.name === activeFilter);
         const off = buildOffsetMap(rels);
 
-        rels.forEach(r=>{ 
-            const s=disp.get(r.sourceId), t=disp.get(r.targetId); 
-            if (!s||!t) return; 
-            const o=off.get(r.id)?.curve||10; 
-            const col = r.sourceId===f||r.targetId===f ? "#ffcc99" : "#6a5a4e"; 
-            drawCurve(ctx,s.x,s.y,t.x,t.y,o,col,r.sourceId===f||r.targetId===f?3.5:1.8); 
-            drawArrowAtEnd(ctx,s.x,s.y,t.x,t.y,o,col); 
+        rels.forEach(r => { 
+            const s = disp.get(r.sourceId), t = disp.get(r.targetId); 
+            if (!s || !t) return; 
+            const o = off.get(r.id)?.curve || 10; 
+            const col = r.sourceId === f || r.targetId === f ? "#ffcc99" : "#6a5a4e"; 
+            drawCurve(ctx, s.x, s.y, t.x, t.y, o, col, r.sourceId === f || r.targetId === f ? 3 : 1.5); 
+            drawArrowAtEnd(ctx, s.x, s.y, t.x, t.y, o, col); 
         });
         
-        rels.forEach(r=>{ 
-            const s=disp.get(r.sourceId), t=disp.get(r.targetId); 
-            if (!s||!t||!r.name) return; 
-            const o=off.get(r.id)?.curve||10; 
-            const sh=off.get(r.id)?.shift||0; 
-            const col = r.sourceId===f||r.targetId===f ? "#ffdd99" : "#ccaa88"; 
-            drawRelationName(ctx,r.name,s.x,s.y,t.x,t.y,o,col,sh); 
+        rels.forEach(r => { 
+            const s = disp.get(r.sourceId), t = disp.get(r.targetId); 
+            if (!s || !t || !r.name) return; 
+            const o = off.get(r.id)?.curve || 10; 
+            const sh = off.get(r.id)?.shift || 0; 
+            const col = r.sourceId === f || r.targetId === f ? "#ffdd99" : "#ccaa88"; 
+            drawRelationName(ctx, r.name, s.x, s.y, t.x, t.y, o, col, sh); 
         });
 
-        disp.forEach((pos,id)=>{
-            const p=persons.find(x=>x.id===id); if (!p) return;
-            const isF=id===f; const r=getNodeRadius(isF,persons.length);
-            ctx.shadowBlur=isF?18:8; ctx.shadowColor=p.color+"80";
+        disp.forEach((pos, id) => {
+            const p = persons.find(x => x.id === id);
+            if (!p) return;
+            const isF = id === f;
+            const r = getNodeRadius(isF, persons.length);
+            ctx.shadowBlur = isF ? 12 : 5;
+            ctx.shadowColor = p.color + "80";
             
-            const g=ctx.createRadialGradient(pos.x-8,pos.y-8,5,pos.x,pos.y,r);
-            g.addColorStop(0,p.color); g.addColorStop(1,"#2a2340");
+            const g = ctx.createRadialGradient(pos.x - 6, pos.y - 6, 4, pos.x, pos.y, r);
+            g.addColorStop(0, p.color);
+            g.addColorStop(1, "#2a2340");
             
-            ctx.beginPath(); ctx.arc(pos.x,pos.y,r,0,Math.PI*2); ctx.fillStyle=g; ctx.fill();
-            ctx.strokeStyle=isF?"#ffdd99":"#bb9977"; ctx.lineWidth=isF?3:2; ctx.stroke();
+            ctx.beginPath();
+            ctx.arc(pos.x, pos.y, r, 0, Math.PI * 2);
+            ctx.fillStyle = g;
+            ctx.fill();
+            ctx.strokeStyle = isF ? "#ffdd99" : "#bb9977";
+            ctx.lineWidth = isF ? 2.5 : 1.5;
+            ctx.stroke();
             
-            ctx.font=`bold ${isF?17:14}px Inter`; ctx.fillStyle="#fff5ea"; ctx.textAlign="center"; ctx.textShadow="0 1px 2px #0008";
-            const n=p.name.length>4?p.name.slice(0,4)+"…":p.name; ctx.fillText(n,pos.x,pos.y+5);
+            ctx.font = `bold ${isF ? 14 : 11}px Inter`;
+            ctx.fillStyle = "#fff5ea";
+            ctx.textAlign = "center";
+            ctx.textShadow = "0 1px 2px #0008";
+            const n = p.name.length > 5 ? p.name.slice(0, 5) + "…" : p.name;
+            ctx.fillText(n, pos.x, pos.y + 4);
             
-            if (isF) { ctx.font="16px Font Awesome"; ctx.fillStyle="#ffdd99"; ctx.fillText("\uf005",pos.x+22,pos.y-14); }
+            if (isF) {
+                ctx.font = "12px Font Awesome";
+                ctx.fillStyle = "#ffdd99";
+                ctx.fillText("\uf005", pos.x + 18, pos.y - 10);
+            }
             
-            ctx.textAlign="left"; ctx.textShadow="none";
+            ctx.textAlign = "left";
+            ctx.textShadow = "none";
         });
         
-        ctx.shadowBlur=0;
+        ctx.shadowBlur = 0;
     }
 
     // ====================== 点击交互 ======================
     function onClick(e) {
         if (persons.length === 0 || animationState.isAnimating) return;
         
-        const r=canvas.getBoundingClientRect(); 
-        const sx=canvas.width/r.width, sy=canvas.height/r.height;
-        const x=(e.clientX-r.left)*sx, y=(e.clientY-r.top)*sy;
+        const rect = canvas.getBoundingClientRect();
+        const scaleX = canvas.width / rect.width;
+        const scaleY = canvas.height / rect.height;
+        const x = (e.clientX - rect.left) * scaleX;
+        const y = (e.clientY - rect.top) * scaleY;
         
-        const f = focusedPersonId || persons[0].id; 
-        const base = computePositions(f); 
+        const f = focusedPersonId || persons[0].id;
+        const base = computePositions(f);
         const disp = applyFloat(base, f, performance.now());
         
         let target = null;
-        disp.forEach((pos, id) => { 
-            const rr = getNodeRadius(id === f, persons.length); 
-            if (Math.hypot(x - pos.x, y - pos.y) <= rr + 5) target = id; 
+        disp.forEach((pos, id) => {
+            const rr = getNodeRadius(id === f, persons.length);
+            if (Math.hypot(x - pos.x, y - pos.y) <= rr + 6) target = id;
         });
         
         if (target && target !== focusedPersonId) {
@@ -569,89 +659,99 @@
 
     // ====================== 筛选 ======================
     function refreshFilter() {
-        const box=document.getElementById("filterTags");
-        const uniq=[...new Set(relations.map(r=>r.name).filter(Boolean))];
-        if (!uniq.length) { box.innerHTML="<span style='font-size:12px;opacity:0.6'>暂无关系</span>"; return; }
-        box.innerHTML=uniq.map(n=>`<div class="filter-tag ${activeFilter===n?'active':''}" onclick="setFilter('${n.replace(/'/g,"\\'")}')">${n}</div>`).join("");
+        const box = document.getElementById("filterTags");
+        const uniq = [...new Set(relations.map(r => r.name).filter(Boolean))];
+        if (!uniq.length) { 
+            box.innerHTML = "<span style='font-size:12px;opacity:0.6'>暂无关系</span>"; 
+            return; 
+        }
+        box.innerHTML = uniq.map(n => `<div class="filter-tag ${activeFilter === n ? 'active' : ''}" onclick="setFilter('${n.replace(/'/g, "\\'")}')">${n}</div>`).join("");
     }
+    
     function setFilter(n) { 
-        activeFilter=activeFilter===n?null:n; 
+        activeFilter = activeFilter === n ? null : n; 
         refreshFilter(); 
         drawGraph(); 
     }
+    
     function clearFilter() { 
-        activeFilter=null; 
+        activeFilter = null; 
         refreshFilter(); 
         drawGraph(); 
     }
 
     // ====================== 樱花特效 ======================
-    const sCanvas=document.getElementById("sakuraCanvas"); let sCtx=sCanvas.getContext("2d"); let petals=[];
-    class Petal{
-        constructor(){
-            this.x=Math.random()*innerWidth;
-            this.y=Math.random()*innerHeight-innerHeight;
-            this.size=3+Math.random()*8;
-            this.sy=0.5+Math.random()*1.5;
-            this.sx=-0.3+Math.random()*0.6;
-            this.rot=Math.random()*Math.PI*2;
-            this.rs=0.005+Math.random()*0.015;
-            this.op=0.4+Math.random()*0.5;
-            this.color=`rgba(255,${180+Math.random()*50},${180+Math.random()*60},${this.op})`;
-            this.swing=Math.random()*0.02;
-            this.sp=Math.random()*Math.PI*2;
+    const sCanvas = document.getElementById("sakuraCanvas");
+    let sCtx = sCanvas.getContext("2d");
+    let petals = [];
+    
+    class Petal {
+        constructor() {
+            this.x = Math.random() * innerWidth;
+            this.y = Math.random() * innerHeight - innerHeight;
+            this.size = 3 + Math.random() * 7;
+            this.sy = 0.5 + Math.random() * 1.3;
+            this.sx = -0.3 + Math.random() * 0.5;
+            this.rot = Math.random() * Math.PI * 2;
+            this.rs = 0.005 + Math.random() * 0.012;
+            this.op = 0.4 + Math.random() * 0.5;
+            this.color = `rgba(255,${180 + Math.random() * 50},${180 + Math.random() * 60},${this.op})`;
+            this.swing = Math.random() * 0.02;
+            this.sp = Math.random() * Math.PI * 2;
         }
-        update(){
-            this.sp+=this.swing;
-            this.x+=this.sx+Math.sin(this.sp)*0.8;
-            this.y+=this.sy+Math.cos(this.sp)*0.3;
-            this.rot+=this.rs;
-            if(this.y>innerHeight+30||this.x<-30||this.x>innerWidth+30){
-                this.x=Math.random()*innerWidth;
-                this.y=-20;
-                this.sp=Math.random()*Math.PI*2;
+        update() {
+            this.sp += this.swing;
+            this.x += this.sx + Math.sin(this.sp) * 0.7;
+            this.y += this.sy + Math.cos(this.sp) * 0.3;
+            this.rot += this.rs;
+            if (this.y > innerHeight + 30 || this.x < -30 || this.x > innerWidth + 30) {
+                this.x = Math.random() * innerWidth;
+                this.y = -20;
+                this.sp = Math.random() * Math.PI * 2;
             }
         }
-        draw(c){
+        draw(c) {
             c.save();
-            c.translate(this.x,this.y);
+            c.translate(this.x, this.y);
             c.rotate(this.rot);
-            c.globalAlpha=this.op;
-            c.fillStyle=this.color;
+            c.globalAlpha = this.op;
+            c.fillStyle = this.color;
             c.beginPath();
-            for(let i=0;i<5;i++){
-                const a=(i*Math.PI*2/5)-Math.PI/2;
-                const r=this.size*(0.8+Math.random()*0.2);
-                const x=r*Math.cos(a), y=r*Math.sin(a);
-                i?c.lineTo(x,y):c.moveTo(x,y);
+            for (let i = 0; i < 5; i++) {
+                const a = (i * Math.PI * 2 / 5) - Math.PI / 2;
+                const r = this.size * (0.8 + Math.random() * 0.2);
+                const x = r * Math.cos(a), y = r * Math.sin(a);
+                i ? c.lineTo(x, y) : c.moveTo(x, y);
             }
             c.closePath();
             c.fill();
-            c.fillStyle=`rgba(255,220,220,${this.op+0.1})`;
+            c.fillStyle = `rgba(255,220,220,${this.op + 0.1})`;
             c.beginPath();
-            c.arc(0,0,this.size*0.2,0,Math.PI*2);
+            c.arc(0, 0, this.size * 0.2, 0, Math.PI * 2);
             c.fill();
             c.restore();
         }
     }
-    function startSakura(){
-        sCanvas.width=innerWidth;
-        sCanvas.height=innerHeight;
-        petals=Array.from({length:80},()=>new Petal());
-        (function loop(){
-            sCtx.clearRect(0,0,sCanvas.width,sCanvas.height);
-            petals.forEach(p=>{p.update();p.draw(sCtx);});
+    
+    function startSakura() {
+        sCanvas.width = innerWidth;
+        sCanvas.height = innerHeight;
+        petals = Array.from({ length: 70 }, () => new Petal());
+        (function loop() {
+            sCtx.clearRect(0, 0, sCanvas.width, sCanvas.height);
+            petals.forEach(p => { p.update(); p.draw(sCtx); });
             requestAnimationFrame(loop);
         })();
     }
-    window.addEventListener("resize",()=>{
-        sCanvas.width=innerWidth;
-        sCanvas.height=innerHeight;
+    
+    window.addEventListener("resize", () => {
+        sCanvas.width = innerWidth;
+        sCanvas.height = innerHeight;
     });
 
     // ====================== 启动 ======================
-    window.setFilter=setFilter; 
-    window.clearFilter=clearFilter;
+    window.setFilter = setFilter;
+    window.clearFilter = clearFilter;
     
     function resizeCanvas() { 
         canvas.width = window.innerWidth; 
