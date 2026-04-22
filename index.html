@@ -697,6 +697,14 @@
                     <div class="info-value">${escapeHtml(schoolValue)}</div>
                 </div>
                 <div class="info-row">
+                    <div class="info-label"><i class="fas fa-star"></i> 最高造诣</div>
+                    <div class="info-value">${escapeHtml(person.skill || '未记录')}</div>
+                </div>
+                <div class="info-row">
+                    <div class="info-label"><i class="fas fa-chart-line"></i> 最高秒伤</div>
+                    <div class="info-value">${escapeHtml(person.dps || '未记录')}</div>
+                </div>
+                <div class="info-row">
                     <div class="info-label"><i class="fas fa-link"></i> 关系</div>
                     <div class="info-value">${relatedRels.length} 条</div>
                 </div>
@@ -773,6 +781,14 @@
                 <div style="display: flex; margin-bottom: 8px;">
                     <div style="width: 80px; color: #ffaa88;">门派</div>
                     <div style="flex:1; color: #f0e6d8;">${escapeHtml(schoolValue)}</div>
+                </div>
+                <div style="display: flex; margin-bottom: 8px;">
+                    <div style="width: 80px; color: #ffaa88;">最高造诣</div>
+                    <div style="flex:1; color: #f0e6d8;">${escapeHtml(person.skill || '未记录')}</div>
+                </div>
+                <div style="display: flex; margin-bottom: 8px;">
+                    <div style="width: 80px; color: #ffaa88;">最高秒伤</div>
+                    <div style="flex:1; color: #f0e6d8;">${escapeHtml(person.dps || '未记录')}</div>
                 </div>
                 <div style="display: flex;">
                     <div style="width: 80px; color: #ffaa88;">关系数</div>
