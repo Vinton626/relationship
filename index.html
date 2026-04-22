@@ -7,6 +7,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
+        /* ========== 完整样式（保留原有所有样式） ========== */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'Inter', sans-serif;
@@ -16,7 +17,6 @@
             background-repeat: no-repeat;
             background-position: center center;
             background-attachment: fixed;
-
             overflow: hidden;
             position: fixed;
             top: 0;
@@ -43,7 +43,7 @@
             cursor: pointer;
         }
         
-        /* ========== 电脑端左侧面板 - 顶天立地 ========== */
+        /* ========== 电脑端左侧面板 ========== */
         .detail-panel {
             position: fixed;
             left: 0;
@@ -69,13 +69,9 @@
             overflow-y: auto;
             display: flex;
             flex-direction: column;
-            height: 100%;  /* 添加这一行 */
+            height: 100%;
         }
         
-        /* 只保留一个滚动条 */
-        .panel-content {
-            scrollbar-width: thin;
-        }
         .panel-content::-webkit-scrollbar {
             width: 4px;
         }
@@ -88,7 +84,6 @@
             border-radius: 2px;
         }
         
-        /* 关系列表区域 - 移除独立滚动条 */
         .relation-list {
             margin-top: 16px;
             max-height: none;
@@ -129,7 +124,7 @@
             font-size: 18px;
         }
         
-        /* 头像区域 - 圆角矩形，拉长，羽化效果 */
+        /* 头像区域 */
         .person-avatar {
             width: 100%;
             max-width: 260px;
@@ -149,7 +144,6 @@
             box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
         }
         
-        /* 边缘羽化效果 */
         .person-avatar::after {
             content: '';
             position: absolute;
@@ -219,6 +213,97 @@
             color: #f0e6d8;
         }
         
+        /* 战力按钮 */
+        .combat-btn {
+            background: rgba(184, 107, 74, 0.25);
+            border: 1px solid #c87a58;
+            border-radius: 32px;
+            padding: 8px 12px;
+            font-size: 12px;
+            font-weight: 500;
+            color: #ffcfaa;
+            cursor: pointer;
+            text-align: center;
+            transition: 0.2s;
+            margin: 12px 0 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+        
+        .combat-btn:hover {
+            background: rgba(184, 107, 74, 0.5);
+            transform: scale(1.01);
+        }
+        
+        /* 电脑端战力浮窗 */
+        .combat-panel {
+            position: fixed;
+            right: 24px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 270px;
+            background: rgba(10, 8, 20, 0.96);
+            backdrop-filter: blur(24px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 180, 150, 0.4);
+            padding: 18px 16px;
+            z-index: 250;
+            transition: all 0.25s ease;
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            box-shadow: 0 10px 28px rgba(0,0,0,0.5);
+        }
+        
+        .combat-panel.show {
+            opacity: 1;
+            visibility: visible;
+            pointer-events: auto;
+        }
+        
+        .combat-panel h4 {
+            color: #ffdd99;
+            font-size: 15px;
+            margin-bottom: 14px;
+            border-left: 3px solid #b86b4a;
+            padding-left: 10px;
+        }
+        
+        .combat-item {
+            display: flex;
+            margin-bottom: 12px;
+            font-size: 12px;
+        }
+        
+        .combat-label {
+            width: 70px;
+            color: #ffaa88;
+        }
+        
+        .combat-value {
+            flex: 1;
+            color: #f0e6d8;
+        }
+        
+        .notice-text {
+            font-size: 10px;
+            color: #ccaa88;
+            margin-top: 12px;
+            padding-top: 8px;
+            border-top: 1px dashed rgba(255,180,140,0.3);
+            display: flex;
+            gap: 6px;
+            align-items: flex-start;
+        }
+        
+        .notice-text i {
+            color: #ffaa66;
+            font-size: 10px;
+            margin-top: 2px;
+        }
+        
         .relation-item {
             font-size: 12px;
             padding: 8px 0;
@@ -276,35 +361,21 @@
         /* 手机端样式 */
         @media (max-width: 768px) {
             .detail-panel { display: none; }
-            .mobile-detail-btn { 
-                display: flex !important;  /* 加上 !important 确保不被后面的样式覆盖 */
+            .mobile-detail-btn { display: flex !important; }
+            .combat-panel { display: none; }
+            .mobile-combat-panel {
+                background: rgba(0, 0, 0, 0.75);
+                border-radius: 18px;
+                padding: 12px;
+                margin-top: 10px;
+                display: none;
+                border: 1px solid rgba(255,180,140,0.3);
             }
-
-            .mobile-avatar {
-                border-radius: 16px !important;
-            }
-
-            /* 手机端关系列表文字颜色 - 与电脑端保持一致 */
-            .mobile-panel .relation-item {
-                color: #ccaa88 !important;
-                border-bottom: 1px solid rgba(255, 180, 140, 0.15);
-                padding: 8px 0;
-               font-size: 12px;
-            }
-    
-            .mobile-panel .relation-item strong {
-                color: #ffaa88 !important;
-            }
-    
-            .mobile-panel .info-label {
-                color: #ffaa88 !important;
-            }
-    
-            .mobile-panel .info-value {
-                color: #f0e6d8 !important;
+            .mobile-combat-panel.show {
+                display: block;
             }
         }
-
+        
         .mobile-detail-btn {
             position: fixed;
             top: 20px;
@@ -319,17 +390,17 @@
             font-size: 20px;
             cursor: pointer;
             box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-         transition: 0.2s;
-            display: none;  /* 电脑端默认隐藏 */
+            transition: 0.2s;
+            display: none;
             align-items: center;
             justify-content: center;
         }
-
+        
         .mobile-detail-btn:hover {
             background: #d47a55;
             transform: scale(1.05);
         }
-
+        
         .mobile-overlay {
             position: fixed;
             top: 0;
@@ -343,11 +414,11 @@
             justify-content: center;
             pointer-events: auto;
         }
-
+        
         .mobile-overlay.show {
             display: flex;
         }
-
+        
         .mobile-panel {
             width: 100%;
             max-height: 75%;
@@ -411,6 +482,7 @@
             align-items: center;
             justify-content: center;
         }
+        
         .filter-btn:hover {
             background: #d47a55;
             transform: scale(1.05);
@@ -436,6 +508,7 @@
             opacity: 0;
             visibility: hidden;
         }
+        
         .float-panel.show {
             transform: translateX(0);
             opacity: 1;
@@ -453,6 +526,7 @@
             cursor: pointer;
             padding: 4px;
         }
+        
         .panel-close:hover {
             color: white;
         }
@@ -462,6 +536,7 @@
             padding-bottom: 12px;
             border-bottom: 1px solid rgba(255, 180, 140, 0.2);
         }
+        
         .section:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
         .section-title { font-size: 0.9rem; font-weight: 600; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
         .filter-group { display: flex; flex-wrap: wrap; gap: 6px; }
@@ -476,13 +551,11 @@
     <canvas id="sakuraCanvas"></canvas>
     <canvas id="graphCanvas"></canvas>
     
-    <!-- 图片放大模态框 -->
     <div class="image-modal" id="imageModal">
         <button class="image-modal-close" id="modalCloseBtn">&times;</button>
         <img id="modalImage" src="" alt="放大图片">
     </div>
     
-    <!-- 电脑端左侧详情面板 -->
     <div class="detail-panel" id="detailPanel">
         <div class="panel-tab" id="panelTab">
             <i class="fas fa-chevron-left"></i>
@@ -498,12 +571,35 @@
         </div>
     </div>
     
-    <!-- 手机端详情按钮 -->
+    <!-- 电脑端战力浮窗 -->
+    <div class="combat-panel" id="combatPanel">
+        <h4><i class="fas fa-fist-raised"></i> 战力详情</h4>
+        <div class="combat-item">
+            <div class="combat-label"><i class="fas fa-vest"></i> 套装</div>
+            <div class="combat-value" id="combatCustom">-</div>
+        </div>
+        <div class="combat-item">
+            <div class="combat-label"><i class="fas fa-book"></i> 心法</div>
+            <div class="combat-value" id="combatBook">-</div>
+        </div>
+        <div class="combat-item">
+            <div class="combat-label"><i class="fas fa-star"></i> 最高造诣</div>
+            <div class="combat-value" id="combatSkill">-</div>
+        </div>
+        <div class="combat-item">
+            <div class="combat-label"><i class="fas fa-chart-line"></i> 最高秒伤</div>
+            <div class="combat-value" id="combatDps">-</div>
+        </div>
+        <div class="notice-text">
+            <i class="fas fa-info-circle"></i>
+            <span>秒伤一栏的括号中内容为食物、服帖、天宫、精元缩写，/代表无需在意（霖霖不计数）</span>
+        </div>
+    </div>
+    
     <button class="mobile-detail-btn" id="mobileDetailBtn">
         <i class="fas fa-info-circle"></i>
     </button>
     
-    <!-- 手机端浮层 -->
     <div class="mobile-overlay" id="mobileOverlay">
         <div class="mobile-panel">
             <div class="mobile-panel-header">
@@ -568,7 +664,6 @@
         return IMAGE_FORMATS.map(format => `${IMAGE_BASE_URL}playerid_${personId}.${format}`);
     }
     
-    // 加载图片，尝试多种格式
     function loadAvatar(personId, callback) {
         const urls = getAvatarUrl(personId);
         let currentIndex = 0;
@@ -635,6 +730,39 @@
     mobilePanelClose.addEventListener('click', () => mobileOverlay.classList.remove('show'));
     mobileOverlay.addEventListener('click', (e) => { if (e.target === mobileOverlay) mobileOverlay.classList.remove('show'); });
     
+    // ====================== 战力面板控制 ======================
+    let combatPanelVisible = false;
+    
+    function toggleCombatPanel(personId) {
+        if (isMobile()) {
+            const mobilePanel = document.getElementById(`mobile-combat-${personId}`);
+            const btnSpan = document.querySelector(`#mobile-combat-btn-${personId} span`);
+            if (mobilePanel) {
+                const isOpen = mobilePanel.style.display === 'block';
+                mobilePanel.style.display = isOpen ? 'none' : 'block';
+                if (btnSpan) btnSpan.innerText = isOpen ? '显示战力详情' : '隐藏战力详情';
+            }
+        } else {
+            combatPanelVisible = !combatPanelVisible;
+            const panel = document.getElementById('combatPanel');
+            const btnSpan = document.querySelector(`#combat-btn-${personId} span`);
+            if (combatPanelVisible) {
+                const person = persons.find(p => p.id === personId);
+                if (person) {
+                    document.getElementById('combatCustom').innerHTML = escapeHtml(person.custom || '未配置');
+                    document.getElementById('combatBook').innerHTML = escapeHtml(person.book || '未配置');
+                    document.getElementById('combatSkill').innerHTML = escapeHtml(person.skill || '未记录');
+                    document.getElementById('combatDps').innerHTML = escapeHtml(person.dps || '未记录');
+                }
+                panel.classList.add('show');
+                if (btnSpan) btnSpan.innerText = '隐藏战力详情';
+            } else {
+                panel.classList.remove('show');
+                if (btnSpan) btnSpan.innerText = '显示战力详情';
+            }
+        }
+    }
+    
     // ====================== 全局变量 ======================
     let persons = [];
     let relations = [];
@@ -643,7 +771,7 @@
     const canvas = document.getElementById('graphCanvas');
     let ctx = canvas.getContext('2d');
     let floatState = new Map();
-    const avatarCache = new Map(); // 图片缓存
+    const avatarCache = new Map();
     
     let animationState = {
         isAnimating: false,
@@ -661,7 +789,6 @@
         const person = persons.find(p => p.id === personId);
         if (!person) return;
         
-        // 获取相关关系
         const relatedRels = relations.filter(r => r.sourceId === personId || r.targetId === personId);
         const relSummary = relatedRels.map(r => {
             const otherId = r.sourceId === personId ? r.targetId : r.sourceId;
@@ -680,9 +807,14 @@
             relSummary.map(r => `<div class="relation-item"><strong>${escapeHtml(r.name)}</strong> ${r.direction} ${escapeHtml(r.otherName)}</div>`).join('') : 
             `<div style="text-align: center; color: #888; font-size: 12px; padding: 20px;">暂无关系记录</div>`;
         
-        // title 和 school 字段不存在时自动显示默认值
         const titleValue = person.title || '未设置';
         const schoolValue = person.school || '未知门派';
+        
+        // 切换人物时关闭战力浮窗
+        if (combatPanelVisible) {
+            document.getElementById('combatPanel').classList.remove('show');
+            combatPanelVisible = false;
+        }
         
         const html = `
             ${avatarHtml}
@@ -696,13 +828,8 @@
                     <div class="info-label"><i class="fas fa-school"></i> 门派</div>
                     <div class="info-value">${escapeHtml(schoolValue)}</div>
                 </div>
-                <div class="info-row">
-                    <div class="info-label"><i class="fas fa-star"></i> 最高造诣</div>
-                    <div class="info-value">${escapeHtml(person.skill || '未记录')}</div>
-                </div>
-                <div class="info-row">
-                    <div class="info-label"><i class="fas fa-chart-line"></i> 最高秒伤</div>
-                    <div class="info-value">${escapeHtml(person.dps || '未记录')}</div>
+                <div class="combat-btn" id="combat-btn-${person.id}" onclick="toggleCombatPanel(${person.id})">
+                    <i class="fas fa-chart-simple"></i> <span>显示战力详情</span>
                 </div>
                 <div class="info-row">
                     <div class="info-label"><i class="fas fa-link"></i> 关系</div>
@@ -719,16 +846,13 @@
         loadAndDisplayAvatar(person.id, `pc-avatar-${person.id}`);
     }
     
-    // 显示人物大图
     function showPersonImage(personId) {
         const person = persons.find(p => p.id === personId);
         if (!person) return;
         
-        // 先检查缓存
         if (avatarCache.has(personId)) {
             showImageModal(avatarCache.get(personId).src);
         } else {
-            // 尝试加载图片
             loadAvatar(personId, (img) => {
                 if (img) {
                     avatarCache.set(personId, img);
@@ -766,6 +890,31 @@
         const titleValue = person.title || '未设置';
         const schoolValue = person.school || '未知门派';
         
+        const mobileCombatHtml = `
+            <div id="mobile-combat-${person.id}" class="mobile-combat-panel">
+                <div style="display: flex; margin-bottom: 8px;">
+                    <div style="width: 70px; color: #ffaa88;"><i class="fas fa-vest"></i> 套装</div>
+                    <div style="flex:1; color: #f0e6d8;">${escapeHtml(person.custom || '未配置')}</div>
+                </div>
+                <div style="display: flex; margin-bottom: 8px;">
+                    <div style="width: 70px; color: #ffaa88;"><i class="fas fa-book"></i> 心法</div>
+                    <div style="flex:1; color: #f0e6d8;">${escapeHtml(person.book || '未配置')}</div>
+                </div>
+                <div style="display: flex; margin-bottom: 8px;">
+                    <div style="width: 70px; color: #ffaa88;"><i class="fas fa-star"></i> 最高造诣</div>
+                    <div style="flex:1; color: #f0e6d8;">${escapeHtml(person.skill || '未记录')}</div>
+                </div>
+                <div style="display: flex; margin-bottom: 8px;">
+                    <div style="width: 70px; color: #ffaa88;"><i class="fas fa-chart-line"></i> 最高秒伤</div>
+                    <div style="flex:1; color: #f0e6d8;">${escapeHtml(person.dps || '未记录')}</div>
+                </div>
+                <div class="notice-text" style="font-size: 10px; margin-top: 8px;">
+                    <i class="fas fa-info-circle"></i>
+                    <span>秒伤一栏的括号中内容为食物、服帖、天宫、精元缩写，/代表无需在意（霖霖不计数）</span>
+                </div>
+            </div>
+        `;
+        
         const html = `
             <div style="margin-bottom: 20px;">
                 ${avatarHtml}
@@ -775,23 +924,19 @@
             </div>
             <div style="background: rgba(0,0,0,0.3); border-radius: 12px; padding: 12px; margin-bottom: 16px;">
                 <div style="display: flex; margin-bottom: 8px;">
-                    <div style="width: 80px; color: #ffaa88;">流派</div>
+                    <div style="width: 70px; color: #ffaa88;">流派</div>
                     <div style="flex:1; color: #f0e6d8;">${escapeHtml(titleValue)}</div>
                 </div>
                 <div style="display: flex; margin-bottom: 8px;">
-                    <div style="width: 80px; color: #ffaa88;">门派</div>
+                    <div style="width: 70px; color: #ffaa88;">门派</div>
                     <div style="flex:1; color: #f0e6d8;">${escapeHtml(schoolValue)}</div>
                 </div>
-                <div style="display: flex; margin-bottom: 8px;">
-                    <div style="width: 80px; color: #ffaa88;">最高造诣</div>
-                    <div style="flex:1; color: #f0e6d8;">${escapeHtml(person.skill || '未记录')}</div>
+                <div class="combat-btn" style="margin: 8px 0 4px;" id="mobile-combat-btn-${person.id}" onclick="toggleCombatPanel(${person.id})">
+                    <i class="fas fa-chart-simple"></i> <span>显示战力详情</span>
                 </div>
-                <div style="display: flex; margin-bottom: 8px;">
-                    <div style="width: 80px; color: #ffaa88;">最高秒伤</div>
-                    <div style="flex:1; color: #f0e6d8;">${escapeHtml(person.dps || '未记录')}</div>
-                </div>
-                <div style="display: flex;">
-                    <div style="width: 80px; color: #ffaa88;">关系数</div>
+                ${mobileCombatHtml}
+                <div style="display: flex; margin-top: 8px;">
+                    <div style="width: 70px; color: #ffaa88;">关系数</div>
                     <div style="flex:1; color: #f0e6d8;">${relatedRels.length} 条</div>
                 </div>
             </div>
@@ -801,13 +946,16 @@
         
         document.getElementById('mobileDetailContent').innerHTML = html;
         loadAndDisplayAvatar(person.id, `mobile-avatar-${person.id}`);
+        
+        // 初始化战力面板为隐藏
+        const initPanel = document.getElementById(`mobile-combat-${person.id}`);
+        if (initPanel) initPanel.style.display = 'none';
     }
     
     function loadAndDisplayAvatar(personId, containerId) {
         const container = document.getElementById(containerId);
         if (!container) return;
         
-        // 检查缓存
         if (avatarCache.has(personId)) {
             displayAvatar(container, avatarCache.get(personId));
             return;
@@ -818,7 +966,6 @@
                 avatarCache.set(personId, img);
                 displayAvatar(container, img);
             } else {
-                // 无图片时显示占位符
                 container.innerHTML = `<div class="avatar-placeholder"><i class="fas fa-image"></i><span>暂无图片</span></div>`;
                 container.style.background = '#2a2545';
             }
@@ -848,8 +995,8 @@
         });
     }
     
-    // 暴露给全局
     window.showPersonImage = showPersonImage;
+    window.toggleCombatPanel = toggleCombatPanel;
     
     // ====================== 读取数据 ======================
     async function loadData() {
@@ -866,7 +1013,6 @@
             
             console.log(`加载成功，共 ${persons.length} 人，${relations.length} 条关系`);
             
-            // 初始化浮动动画状态
             floatState.clear();
             persons.forEach(p => {
                 floatState.set(p.id, {
@@ -898,13 +1044,17 @@
     
     function setFocusedPersonAndUpdate(personId) {
         focusedPersonId = personId;
+        if (combatPanelVisible) {
+            document.getElementById('combatPanel').classList.remove('show');
+            combatPanelVisible = false;
+        }
         if (!isMobile()) {
             updateDetailPanel(personId);
         }
         drawGraph();
     }
     
-    // ====================== 动画和绘图函数 ======================
+    // ====================== 动画和绘图函数（完整版） ======================
     function easeOutCubic(t) { return 1 - Math.pow(1 - t, 3); }
     
     function animateFocusChange(newFocusId) {
@@ -1189,7 +1339,6 @@
         ctx.textAlign = "left";
     }
     
-    // 添加 roundRect 方法
     if (!CanvasRenderingContext2D.prototype.roundRect) {
         CanvasRenderingContext2D.prototype.roundRect = function(x, y, w, h, r) {
             r = Math.min(r, w / 2, h / 2);
