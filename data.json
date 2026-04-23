@@ -45,17 +45,6 @@
       "book": "6扶摇直上6易水歌5三穷致知4擒天势"
     },
     {
-      "id": 5,
-      "name": "醉余晚",
-      "title": "钧钧",
-      "school": "无门无派",
-      "color": "#d9a7c7",
-      "skill": "3.774鹅",
-      "dps": "",
-      "custom": "断岳玄甲",
-      "book": "4霜天白夜5易水歌4孤忠不辞3穿喉诀"
-    },
-    {
       "id": 6,
       "name": "绾月尘",
       "title": "玉玉",
@@ -117,7 +106,7 @@
       "school": "九流门",
       "color": "#d9a7c7",
       "skill": "4.319鹅",
-      "dps": "",
+      "dps": "72864(玉+秋+火+/)",
       "custom": "玉斗易相",
       "book": "6无名心法6易水歌6千山法6威猛歌"
     },
@@ -128,7 +117,7 @@
       "school": "青溪",
       "color": "#d9a7c7",
       "skill": "4.352鹅",
-      "dps": "71056(玉+沧+火+/)",
+      "dps": "68770(玉+沧+火+/)",
       "custom": "断岳玄甲",
       "book": "6霜天白夜6易水歌6征人归5穿喉诀"
     },
@@ -232,15 +221,10 @@
       "book": ""
     },
     {
-      "id": 22,
-      "name": "愿温之",
+      "id": 23,
+      "name": "愿温知",
       "title": "风风",
-      "school": "未知",
-      "color": "#d9a7c7",
-      "skill": "",
-      "dps": "",
-      "custom": "",
-      "book": ""
+      "color": "#d9a7c7"
     }
   ],
   "relations": [
@@ -371,12 +355,6 @@
       "name": "三师弟"
     },
     {
-      "id": 31,
-      "sourceId": 2,
-      "targetId": 5,
-      "name": "大徒弟"
-    },
-    {
       "id": 35,
       "sourceId": 3,
       "targetId": 4,
@@ -461,28 +439,10 @@
       "name": "大师姐"
     },
     {
-      "id": 51,
-      "sourceId": 3,
-      "targetId": 5,
-      "name": "三房（名义上的）"
-    },
-    {
       "id": 52,
       "sourceId": 4,
       "targetId": 3,
       "name": "二师姐"
-    },
-    {
-      "id": 53,
-      "sourceId": 4,
-      "targetId": 5,
-      "name": "情敌"
-    },
-    {
-      "id": 54,
-      "sourceId": 5,
-      "targetId": 4,
-      "name": "情敌"
     },
     {
       "id": 55,
@@ -515,18 +475,6 @@
       "name": "情敌"
     },
     {
-      "id": 60,
-      "sourceId": 5,
-      "targetId": 2,
-      "name": "师父"
-    },
-    {
-      "id": 61,
-      "sourceId": 5,
-      "targetId": 6,
-      "name": "三师弟"
-    },
-    {
       "id": 63,
       "sourceId": 1,
       "targetId": 15,
@@ -542,43 +490,19 @@
       "id": 65,
       "sourceId": 2,
       "targetId": 15,
-      "name": "二徒弟"
+      "name": "大徒弟"
     },
     {
       "id": 66,
       "sourceId": 2,
       "targetId": 6,
-      "name": "三徒弟"
-    },
-    {
-      "id": 67,
-      "sourceId": 5,
-      "targetId": 15,
-      "name": "二师弟"
-    },
-    {
-      "id": 68,
-      "sourceId": 5,
-      "targetId": 14,
-      "name": "情敌"
-    },
-    {
-      "id": 69,
-      "sourceId": 14,
-      "targetId": 5,
-      "name": "情敌"
-    },
-    {
-      "id": 72,
-      "sourceId": 15,
-      "targetId": 5,
-      "name": "大师姐"
+      "name": "二徒弟"
     },
     {
       "id": 73,
       "sourceId": 15,
       "targetId": 6,
-      "name": "三师弟"
+      "name": "二师弟"
     },
     {
       "id": 74,
@@ -587,28 +511,16 @@
       "name": "师父"
     },
     {
-      "id": 75,
-      "sourceId": 6,
-      "targetId": 5,
-      "name": "大师姐"
-    },
-    {
       "id": 76,
       "sourceId": 6,
       "targetId": 15,
-      "name": "二师兄"
-    },
-    {
-      "id": 77,
-      "sourceId": 5,
-      "targetId": 7,
-      "name": "四师弟"
+      "name": "大师兄"
     },
     {
       "id": 78,
       "sourceId": 6,
       "targetId": 7,
-      "name": "四师弟"
+      "name": "三师弟"
     },
     {
       "id": 79,
@@ -752,7 +664,7 @@
       "id": 110,
       "sourceId": 2,
       "targetId": 7,
-      "name": "四徒弟"
+      "name": "三徒弟"
     },
     {
       "id": 111,
@@ -764,7 +676,7 @@
       "id": 112,
       "sourceId": 15,
       "targetId": 7,
-      "name": "四师弟"
+      "name": "三师弟"
     },
     {
       "id": 113,
@@ -773,22 +685,16 @@
       "name": "师父"
     },
     {
-      "id": 114,
-      "sourceId": 7,
-      "targetId": 5,
-      "name": "大师姐"
-    },
-    {
       "id": 116,
       "sourceId": 7,
       "targetId": 15,
-      "name": "二师兄"
+      "name": "大师兄"
     },
     {
       "id": 117,
       "sourceId": 7,
       "targetId": 6,
-      "name": "三师兄"
+      "name": "二师兄"
     },
     {
       "id": 118,
@@ -839,18 +745,6 @@
       "name": "自己"
     },
     {
-      "id": 126,
-      "sourceId": 21,
-      "targetId": 22,
-      "name": "大徒弟"
-    },
-    {
-      "id": 127,
-      "sourceId": 22,
-      "targetId": 21,
-      "name": "师父"
-    },
-    {
       "id": 128,
       "sourceId": 2,
       "targetId": 15,
@@ -861,6 +755,18 @@
       "sourceId": 15,
       "targetId": 2,
       "name": "侠缘"
+    },
+    {
+      "id": 130,
+      "sourceId": 23,
+      "targetId": 21,
+      "name": "师父"
+    },
+    {
+      "id": 131,
+      "sourceId": 21,
+      "targetId": 23,
+      "name": "大徒弟"
     }
   ]
 }
