@@ -63,25 +63,36 @@
         .right-panel-header h3 { color: #ffdd99; font-size: 18px; }
         .close-right-panel { background: none; border: none; color: #ffaa88; font-size: 24px; cursor: pointer; }
         
-        /* 图例按钮 */
+        /* 图例按钮和下拉面板 */
         .legend-btn {
             background: rgba(184,107,74,0.8); border: none; color: white; width: 36px; height: 36px;
             border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center;
             font-size: 18px; transition: 0.2s; box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            position: relative; z-index: 170;
         }
         .legend-btn:hover { background: #d47a55; transform: scale(1.05); }
-        .pc-legend-btn { position: fixed; top: 20px; right: 20px; z-index: 160; }
+        
+        .legend-dropdown {
+            position: fixed; background: rgba(20,18,35,0.95); backdrop-filter: blur(16px);
+            border-radius: 16px; padding: 12px 16px; border: 1px solid rgba(255,180,150,0.4);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3); z-index: 165; display: none;
+            min-width: 180px;
+        }
+        .legend-dropdown.show { display: block; }
+        .legend-item { display: flex; align-items: center; gap: 10px; padding: 6px 0; font-size: 12px; }
+        .legend-color { width: 20px; height: 20px; border-radius: 4px; }
+        .legend-text { color: #f0e6d8; }
+        
+        .pc-legend-btn { position: fixed; top: 20px; right: 20px; }
+        .pc-legend-dropdown { top: 65px; right: 20px; }
+        
         .mobile-legend-btn { position: fixed; top: 20px; left: 20px; z-index: 1001; width: 40px; height: 40px; background: #b86b4a; border-radius: 50%; display: none; align-items: center; justify-content: center; color: white; font-size: 18px; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
+        .mobile-legend-dropdown { top: 70px; left: 20px; }
+        
         @media (max-width: 768px) {
             .pc-legend-btn { display: none; }
             .mobile-legend-btn { display: flex; }
         }
-        
-        /* 图例弹窗 */
-        .legend-modal .legend-content { display: flex; flex-direction: column; gap: 12px; }
-        .legend-item { display: flex; align-items: center; gap: 12px; font-size: 14px; }
-        .legend-color { width: 24px; height: 24px; border-radius: 4px; }
-        .legend-text { color: #f0e6d8; }
         
         .right-func-buttons { padding: 16px; display: flex; flex-direction: column; gap: 12px; }
         .func-btn { background: rgba(184,107,74,0.2); border: 1px solid #c87a58; border-radius: 40px; padding: 12px; font-size: 15px; font-weight: 500; color: #ffcfaa; cursor: pointer; text-align: center; display: flex; align-items: center; justify-content: center; gap: 8px; }
@@ -113,11 +124,13 @@
         
         /* 弹窗样式 */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 2000; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(8px); }
-        .modal-container { background: rgba(25,22,45,0.98); backdrop-filter: blur(20px); border-radius: 28px; width: 90%; max-width: 500px; max-height: 85vh; display: flex; flex-direction: column; border: 1px solid rgba(255,180,150,0.5); }
+        .modal-container { background: rgba(25,22,45,0.98); backdrop-filter: blur(20px); border-radius: 28px; width: 90%; max-width: 900px; max-height: 85vh; display: flex; flex-direction: column; border: 1px solid rgba(255,180,150,0.5); }
         .modal-header { padding: 16px 20px; border-bottom: 1px solid rgba(255,180,140,0.3); display: flex; justify-content: space-between; align-items: center; }
         .modal-header h2 { color: #ffdd99; font-size: 20px; }
         .modal-close { background: none; border: none; color: #ffaa88; font-size: 28px; cursor: pointer; }
         .modal-body { padding: 16px 20px; overflow-y: auto; flex: 1; color: #f0e6d8; }
+        .modal-body .person-card .name { color: #ffdd99 !important; }
+        .modal-body .detail-line { color: #ccaa88 !important; }
         
         /* 图片放大模态框 */
         .image-modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 3000; display: flex; align-items: center; justify-content: center; cursor: pointer; }
@@ -178,10 +191,13 @@
     <canvas id="sakuraCanvas"></canvas>
     <canvas id="graphCanvas"></canvas>
     
-    <!-- 电脑端图例按钮（右上角） -->
+    <!-- 电脑端图例按钮和下拉面板 -->
     <button class="legend-btn pc-legend-btn" id="pcLegendBtn"><i class="fas fa-palette"></i></button>
-    <!-- 手机端图例按钮（左上角） -->
+    <div class="legend-dropdown pc-legend-dropdown" id="pcLegendDropdown"></div>
+    
+    <!-- 手机端图例按钮和下拉面板 -->
     <button class="mobile-legend-btn" id="mobileLegendBtn"><i class="fas fa-palette"></i></button>
+    <div class="legend-dropdown mobile-legend-dropdown" id="mobileLegendDropdown"></div>
     
     <div class="detail-panel" id="detailPanel">
         <div class="panel-tab" id="panelTab"><i class="fas fa-chevron-left"></i><span>详 情</span></div>
@@ -242,9 +258,20 @@
         let persons = [], relations = [], focusedPersonId = null, activeFilter = null;
         let floatState = new Map(), avatarCache = new Map();
         
+        // 图例数据
+        const legendItems = [
+            { color: '#FFD700', text: '师父、师娘、徒弟' },
+            { color: '#90EE90', text: '师兄、师弟、师姐、师妹' },
+            { color: '#FF69B4', text: '侠缘、情缘、大房~六房' },
+            { color: '#87CEEB', text: '结义' },
+            { color: '#FF4444', text: '情敌' },
+            { color: '#FFFFFF', text: '自己' },
+            { color: '#B0B0B0', text: '其他关系' }
+        ];
+        
         // 关系类型颜色映射（基于关键词匹配）
         function getRelationColor(relationName) {
-            if (!relationName) return '#B0B0B0'; // 浅灰色
+            if (!relationName) return '#B0B0B0';
             const name = relationName;
             // 大房~六房 → 粉色
             if (name.includes('大房') || name.includes('二房') || name.includes('三房') || 
@@ -263,32 +290,37 @@
             if (name.includes('结义')) return '#87CEEB';
             // 包含"自己" → 白色
             if (name.includes('自己')) return '#FFFFFF';
-            // 默认浅灰色
             return '#B0B0B0';
         }
         
-        // 图例数据
-        const legendItems = [
-            { color: '#FFD700', text: '师父、师娘、徒弟' },
-            { color: '#90EE90', text: '师兄、师弟、师姐、师妹' },
-            { color: '#FF69B4', text: '侠缘、情缘、大房~六房' },
-            { color: '#87CEEB', text: '结义' },
-            { color: '#FF4444', text: '情敌' },
-            { color: '#FFFFFF', text: '自己' },
-            { color: '#B0B0B0', text: '其他关系' }
-        ];
+        // 构建图例下拉面板HTML
+        function buildLegendHTML() {
+            return legendItems.map(item => `
+                <div class="legend-item">
+                    <div class="legend-color" style="background: ${item.color}; box-shadow: 0 0 3px ${item.color};"></div>
+                    <div class="legend-text">${item.text}</div>
+                </div>
+            `).join('');
+        }
         
-        // 显示图例弹窗
-        function showLegend() {
-            showModal('🎨 关系图例', (container) => {
-                container.className = 'legend-content';
-                container.innerHTML = legendItems.map(item => `
-                    <div class="legend-item">
-                        <div class="legend-color" style="background: ${item.color}; box-shadow: 0 0 4px ${item.color};"></div>
-                        <div class="legend-text">${item.text}</div>
-                    </div>
-                `).join('');
-            });
+        // 切换图例下拉面板
+        function toggleLegend(dropdownId, btnId) {
+            const dropdown = document.getElementById(dropdownId);
+            const btn = document.getElementById(btnId);
+            const isShow = dropdown.classList.contains('show');
+            // 关闭所有图例
+            document.querySelectorAll('.legend-dropdown').forEach(d => d.classList.remove('show'));
+            if (!isShow) {
+                dropdown.classList.add('show');
+                // 点击其他地方关闭
+                const closeHandler = (e) => {
+                    if (!dropdown.contains(e.target) && e.target !== btn && !btn.contains(e.target)) {
+                        dropdown.classList.remove('show');
+                        document.removeEventListener('click', closeHandler);
+                    }
+                };
+                setTimeout(() => document.addEventListener('click', closeHandler), 10);
+            }
         }
         
         // 动画状态
@@ -312,7 +344,6 @@
         function getAvatarUrl(id) { return IMAGE_FORMATS.map(f => `${IMAGE_BASE_URL}playerid_${id}.${f}`); }
         function loadAvatar(id, cb) { let urls = getAvatarUrl(id), idx=0; (function tryNext(){ if(idx>=urls.length){ cb(null); return; } let img=new Image(); img.onload=()=>cb(img); img.onerror=()=>{ idx++; tryNext(); }; img.src=urls[idx]; })(); }
         
-        // 图片放大显示
         function showImageModal(imageUrl) {
             const modalDiv = document.createElement('div');
             modalDiv.className = 'image-modal-overlay';
@@ -321,7 +352,6 @@
             modalDiv.onclick = () => modalDiv.remove();
         }
         
-        // 判断是否为无效秒伤
         function isInvalidDps(str) {
             if(!str) return true;
             return str.trim() === '--' || str.trim() === '— —' || str.trim() === '-' || str.includes('未记录');
@@ -373,7 +403,6 @@
             }
         }
         
-        // 绘图核心函数
         function getNodeRadius(isFocus, total) { const m=isMobile(); if(m) return isFocus?Math.max(15,21-Math.floor(total/12)):Math.max(10,15-Math.floor(total/14)); else return isFocus?Math.max(22,30-Math.floor(total/8)):Math.max(14,22-Math.floor(total/10)); }
         function getFloatOffset(pid, isFocus, now) { let f=floatState.get(pid); if(!f) return {x:0,y:0}; let t=now*f.speed+f.phase, s=isFocus?0.6:1, a=isMobile()?0.7:1; return {x:Math.sin(t)*f.ampX*s*a, y:Math.cos(t*1.13)*f.ampY*s*a}; }
         
@@ -670,7 +699,6 @@
             }); 
         };
         
-        // 排行榜等功能
         function openRanking(){ 
             showModal('战斗排行榜', (body)=>{ 
                 let sortType = 'skill';
@@ -757,7 +785,16 @@
         }
         
         function init(){
-            resizeCanvas(); window.addEventListener('resize',()=>{ canvas.width=innerWidth; canvas.height=innerHeight; sCanvas.width=innerWidth; sCanvas.height=innerHeight; drawGraph(); setFooterNote(); });
+            // 初始化图例下拉面板内容
+            document.getElementById('pcLegendDropdown').innerHTML = buildLegendHTML();
+            document.getElementById('mobileLegendDropdown').innerHTML = buildLegendHTML();
+            
+            // 图例按钮事件
+            document.getElementById('pcLegendBtn').onclick = (e) => { e.stopPropagation(); toggleLegend('pcLegendDropdown', 'pcLegendBtn'); };
+            document.getElementById('mobileLegendBtn').onclick = (e) => { e.stopPropagation(); toggleLegend('mobileLegendDropdown', 'mobileLegendBtn'); };
+            
+            resizeCanvas(); 
+            window.addEventListener('resize',()=>{ canvas.width=innerWidth; canvas.height=innerHeight; sCanvas.width=innerWidth; sCanvas.height=innerHeight; drawGraph(); setFooterNote(); });
             canvas.addEventListener('click',onClickCanvas);
             document.getElementById('filterToggleBtn').addEventListener('click',()=>document.getElementById('floatPanel').classList.toggle('show'));
             document.getElementById('panelCloseBtn').addEventListener('click',()=>document.getElementById('floatPanel').classList.remove('show'));
@@ -779,10 +816,6 @@
             document.getElementById('rankBtn').onclick=()=>{ document.getElementById('rightFuncPanel').classList.remove('open'); openRanking(); };
             document.getElementById('schoolSortBtn').onclick=()=>{ document.getElementById('rightFuncPanel').classList.remove('open'); openSchool(); };
             document.getElementById('factionSortBtn').onclick=()=>{ document.getElementById('rightFuncPanel').classList.remove('open'); openFaction(); };
-            
-            // 图例按钮
-            document.getElementById('pcLegendBtn').onclick = () => showLegend();
-            document.getElementById('mobileLegendBtn').onclick = () => showLegend();
             
             let searchInput = document.getElementById('searchInput');
             searchInput.addEventListener('keypress', (e) => { if(e.key === 'Enter') searchAndFocus(searchInput.value, false); });
