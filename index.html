@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>共用关系图 - 终极版</title>
+    <title>共用关系图 - 最终版</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
@@ -94,33 +94,58 @@
         .person-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; }
         .person-card { background: rgba(0,0,0,0.4); border-radius: 16px; padding: 12px; cursor: pointer; transition: 0.2s; border: 1px solid rgba(255,180,140,0.2); }
         .person-card:hover { background: rgba(184,107,74,0.3); transform: translateY(-2px); }
-        .person-card .rank-num { display: inline-block; background: #b86b4a; border-radius: 20px; padding: 2px 8px; font-size: 11px; margin-right: 8px; color: white; }
-        .person-card .name { font-weight: bold; color: #ffdd99; font-size: 16px; margin-bottom: 6px; }
+        .rank-num { display: inline-block; font-size: 14px; margin-right: 6px; }
+        .person-card .name { font-weight: bold; color: #ffdd99; font-size: 16px; margin-bottom: 6px; display: inline-block; }
         .detail-line { font-size: 12px; color: #ccaa88; margin-top: 4px; display: flex; justify-content: space-between; }
         .school-group { margin-bottom: 24px; }
         .school-title { font-size: 18px; font-weight: bold; color: #ffaa88; margin: 12px 0 8px; border-left: 4px solid #b86b4a; padding-left: 12px; }
         .sub-group { margin-left: 20px; margin-bottom: 16px; }
         .sub-title { font-size: 14px; color: #ffcfaa; margin: 8px 0 8px; padding-left: 8px; border-left: 2px solid #c87a58; }
         
-        /* 手机端 */
+        /* 手机端 - 确保按钮可见 */
         @media (max-width: 768px) {
             .detail-panel { display: none; }
             .more-func-toggle { display: none; }
-            .filter-btn { bottom: 80px; right: 15px; }
+            .filter-btn { bottom: 80px; right: 15px; z-index: 1001; }
             .float-panel { bottom: 140px; right: 15px; }
-            .mobile-detail-btn, .mobile-func-menu { display: flex; }
-            .mobile-func-menu { left: 20px; bottom: 20px; }
-            .mobile-detail-btn { right: 20px; bottom: 20px; top: auto; } /* 两个按钮同一高度 */
+            .mobile-detail-btn, .mobile-func-menu { display: flex !important; }
         }
-        .mobile-detail-btn { position: fixed; width: 48px; height: 48px; border-radius: 24px; background: #b86b4a; border: none; color: white; font-size: 20px; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.3); display: none; align-items: center; justify-content: center; z-index: 1000; }
-        .mobile-func-menu { position: fixed; width: 52px; height: 52px; border-radius: 26px; background: #b86b4a; border: none; color: white; font-size: 24px; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.3); display: none; align-items: center; justify-content: center; z-index: 1000; }
-        .mobile-drawer { position: fixed; bottom: 0; left: 0; width: 100%; background: rgba(20,18,35,0.98); backdrop-filter: blur(20px); border-radius: 24px 24px 0 0; transform: translateY(100%); transition: transform 0.3s ease; z-index: 2000; padding: 20px; display: flex; flex-direction: column; gap: 12px; border-top: 1px solid rgba(255,180,150,0.5); }
+        .mobile-detail-btn {
+            position: fixed; top: 20px; right: 20px; z-index: 1001;
+            width: 48px; height: 48px; border-radius: 24px; background: #b86b4a;
+            border: none; color: white; font-size: 20px; cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3); display: none;
+            align-items: center; justify-content: center;
+        }
+        .mobile-func-menu {
+            position: fixed; bottom: 20px; left: 20px; z-index: 1001;
+            width: 52px; height: 52px; border-radius: 26px; background: #b86b4a;
+            border: none; color: white; font-size: 24px; cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3); display: none;
+            align-items: center; justify-content: center;
+        }
+        .mobile-drawer {
+            position: fixed; bottom: 0; left: 0; width: 100%;
+            background: rgba(20,18,35,0.98); backdrop-filter: blur(20px);
+            border-radius: 24px 24px 0 0; transform: translateY(100%);
+            transition: transform 0.3s ease; z-index: 2000; padding: 20px;
+            display: flex; flex-direction: column; gap: 12px;
+            border-top: 1px solid rgba(255,180,150,0.5);
+        }
         .mobile-drawer.open { transform: translateY(0); }
         .mobile-drawer .func-btn { background: #2a2545; justify-content: center; }
         .drawer-header { display: flex; justify-content: space-between; margin-bottom: 8px; color: #ffdd99; font-size: 18px; }
-        .mobile-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 2000; display: none; align-items: flex-end; justify-content: center; }
+        .mobile-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7); z-index: 2000; display: none;
+            align-items: flex-end; justify-content: center;
+        }
         .mobile-overlay.show { display: flex; }
-        .mobile-panel { width: 100%; max-height: 75%; background: rgba(20,18,35,0.98); backdrop-filter: blur(20px); border-radius: 24px 24px 0 0; padding: 20px; overflow-y: auto; }
+        .mobile-panel {
+            width: 100%; max-height: 75%; background: rgba(20,18,35,0.98);
+            backdrop-filter: blur(20px); border-radius: 24px 24px 0 0;
+            padding: 20px; overflow-y: auto;
+        }
         .footer-note { position: fixed; bottom: 12px; left: 50%; transform: translateX(-50%); color: rgba(255,255,255,0.5); font-size: 0.7rem; z-index: 10; white-space: nowrap; pointer-events: none; }
     </style>
 </head>
@@ -149,15 +174,24 @@
         <div class="section"><div class="section-title"><i class="fas fa-filter"></i> 关系筛选</div><div id="filterTags" class="filter-group"></div><button id="clearFilterBtn" class="clear-btn">清除筛选</button></div>
     </div>
     
+    <!-- 手机端按钮 -->
     <button class="mobile-detail-btn" id="mobileDetailBtn"><i class="fas fa-info-circle"></i></button>
-    <div class="mobile-overlay" id="mobileOverlay"><div class="mobile-panel"><div class="drawer-header"><span><i class="fas fa-user"></i> 人物详情</span><button id="mobilePanelClose" style="background:none;border:none;color:#ffaa88;font-size:20px;"><i class="fas fa-times"></i></button></div><div id="mobileDetailContent"></div></div></div>
     <button class="mobile-func-menu" id="mobileFuncBtn"><i class="fas fa-ellipsis-h"></i></button>
+    
+    <div class="mobile-overlay" id="mobileOverlay">
+        <div class="mobile-panel">
+            <div class="drawer-header"><span><i class="fas fa-user"></i> 人物详情</span><button id="mobilePanelClose" style="background:none;border:none;color:#ffaa88;font-size:20px;"><i class="fas fa-times"></i></button></div>
+            <div id="mobileDetailContent"></div>
+        </div>
+    </div>
+    
     <div class="mobile-drawer" id="mobileDrawer">
         <div class="drawer-header"><span><i class="fas fa-tools"></i> 功能选择</span><button id="closeDrawer" style="background:none;border:none;color:#ffaa88;font-size:20px;"><i class="fas fa-times"></i></button></div>
         <div class="func-btn" id="mobileRankBtn"><i class="fas fa-trophy"></i> 战斗排行榜</div>
         <div class="func-btn" id="mobileSchoolBtn"><i class="fas fa-flag-checkered"></i> 按流派分类</div>
         <div class="func-btn" id="mobileFactionBtn"><i class="fas fa-shield-alt"></i> 按门派分类</div>
     </div>
+    
     <div class="footer-note"><i class="fas fa-hand-pointer"></i> 点击圆点切换人物视角</div>
 
     <script>
@@ -178,11 +212,19 @@
         function getAvatarUrl(id) { return IMAGE_FORMATS.map(f => `${IMAGE_BASE_URL}playerid_${id}.${f}`); }
         function loadAvatar(id, cb) { let urls = getAvatarUrl(id), idx=0; (function tryNext(){ if(idx>=urls.length){ cb(null); return; } let img=new Image(); img.onload=()=>cb(img); img.onerror=()=>{ idx++; tryNext(); }; img.src=urls[idx]; })(); }
         
-        // 获取造诣数值（用于排序）
-        function getSkillValue(p) { if(!p.skill) return 0; let match = p.sskill?.match(/(\d+)/) || p.skill?.match(/(\d+)/); return match ? parseInt(match[0]) : 0; }
-        function getDpsValue(p) { if(!p.dps) return 0; let match = p.dps.match(/(\d+\.?\d*)/); return match ? parseFloat(match[0]) : 0; }
+        // 获取造诣数值（正确解析 skill 字段中的数字）
+        function getSkillValue(p) { 
+            if(!p.skill) return 0; 
+            let match = p.skill.match(/(\d+)/);
+            return match ? parseInt(match[0]) : 0; 
+        }
+        function getDpsValue(p) { 
+            if(!p.dps) return 0; 
+            let match = p.dps.match(/(\d+\.?\d*)/);
+            return match ? parseFloat(match[0]) : 0; 
+        }
         
-        // 绘图核心（保持原有逻辑）
+        // 绘图核心
         function getNodeRadius(isFocus, total) { const m=isMobile(); if(m) return isFocus?Math.max(15,21-Math.floor(total/12)):Math.max(10,15-Math.floor(total/14)); else return isFocus?Math.max(22,30-Math.floor(total/8)):Math.max(14,22-Math.floor(total/10)); }
         function getFloatOffset(pid, isFocus, now) { let f=floatState.get(pid); if(!f) return {x:0,y:0}; let t=now*f.speed+f.phase, s=isFocus?0.6:1, a=isMobile()?0.7:1; return {x:Math.sin(t)*f.ampX*s*a, y:Math.cos(t*1.13)*f.ampY*s*a}; }
         function computePositions(focusId) { let m=new Map(), w=canvas.width, h=canvas.height; if(!persons.length) return m; let f=persons.some(p=>p.id===focusId)?focusId:persons[0].id; m.set(f,{x:w/2,y:h/2}); let others=persons.filter(p=>p.id!==f), cnt=others.length; if(!cnt) return m; let mobile=isMobile(), baseR=Math.min(w,h), r1=mobile?baseR*0.40:baseR*0.28, r2=mobile?baseR*0.54:baseR*0.40, cap=Math.min(12,cnt); others.forEach((p,i)=>{ let ring1=i<cap, r=ring1?r1:r2, ringCnt=ring1?cap:cnt-cap, step=ringCnt?Math.PI*2/ringCnt:0, ang=-Math.PI/2+(ring1?i:i-cap)*step, x=w/2+Math.cos(ang)*r, y=h/2+Math.sin(ang)*r, margin=mobile?40:60; x=Math.min(w-margin,Math.max(margin,x)); y=Math.min(h-margin,Math.max(margin,y)); m.set(p.id,{x,y}); }); return m; }
@@ -205,7 +247,7 @@
         class Petal{ constructor(){ this.x=Math.random()*innerWidth; this.y=Math.random()*innerHeight-innerHeight; this.size=3+Math.random()*7; this.sy=0.5+Math.random()*1.3; this.sx=-0.3+Math.random()*0.5; this.rot=Math.random()*Math.PI*2; this.rs=0.005+Math.random()*0.012; this.op=0.4+Math.random()*0.5; this.color=`rgba(255,${180+Math.random()*50},${180+Math.random()*60},${this.op})`; this.swing=Math.random()*0.02; this.sp=Math.random()*Math.PI*2; } update(){ this.sp+=this.swing; this.x+=this.sx+Math.sin(this.sp)*0.7; this.y+=this.sy+Math.cos(this.sp)*0.3; this.rot+=this.rs; if(this.y>innerHeight+30||this.x<-30||this.x>innerWidth+30){ this.x=Math.random()*innerWidth; this.y=-20; this.sp=Math.random()*Math.PI*2; } } draw(c){ c.save(); c.translate(this.x,this.y); c.rotate(this.rot); c.globalAlpha=this.op; c.fillStyle=this.color; c.beginPath(); for(let i=0;i<5;i++){ let a=(i*Math.PI*2/5)-Math.PI/2, r=this.size*(0.8+Math.random()*0.2), x=r*Math.cos(a), y=r*Math.sin(a); i?c.lineTo(x,y):c.moveTo(x,y); } c.closePath(); c.fill(); c.fillStyle=`rgba(255,220,220,${this.op+0.1})`; c.beginPath(); c.arc(0,0,this.size*0.2,0,Math.PI*2); c.fill(); c.restore(); } }
         function startSakura(){ sCanvas.width=innerWidth; sCanvas.height=innerHeight; petals=Array.from({length:70},()=>new Petal()); function loop(){ sCtx.clearRect(0,0,sCanvas.width,sCanvas.height); petals.forEach(p=>{ p.update(); p.draw(sCtx); }); requestAnimationFrame(loop); } loop(); }
         
-        // 弹窗系统 - 完整显示人物信息
+        // 弹窗系统
         function showModal(title, buildContent) { let old=document.getElementById('dynamicModal'); if(old) old.remove(); let div=document.createElement('div'); div.className='modal-overlay'; div.id='dynamicModal'; div.innerHTML=`<div class="modal-container"><div class="modal-header"><h2>${escapeHtml(title)}</h2><button class="modal-close">&times;</button></div><div class="modal-body" id="modalBody"></div></div>`; document.body.appendChild(div); buildContent(div.querySelector('#modalBody')); div.querySelector('.modal-close').onclick=()=>div.remove(); div.onclick=(e)=>{ if(e.target===div) div.remove(); }; }
         window.showPersonModal = function(id) { 
             let p=persons.find(p=>p.id===id); if(!p)return; 
@@ -215,10 +257,10 @@
             }); 
         };
         
-        // 战斗排行榜（按造诣排序，带排名序号，带流派/门派筛选）
+        // 战斗排行榜（按造诣排序，使用🐾标志）
         function openRanking(){ 
             showModal('战斗排行榜', (body)=>{ 
-                let sortType = 'skill'; // skill 或 dps
+                let sortType = 'skill';
                 let schoolFilter = 'all';
                 let factionFilter = 'all';
                 
@@ -244,7 +286,7 @@
                     let grid = document.createElement('div'); grid.className = 'person-grid';
                     sorted.forEach((pp, idx) => {
                         let card = document.createElement('div'); card.className = 'person-card';
-                        card.innerHTML = `<div><span class="rank-num">#${idx+1}</span><span class="name">${escapeHtml(pp.name)}</span></div>
+                        card.innerHTML = `<div><span class="rank-num">🐾 ${idx+1}</span><span class="name">${escapeHtml(pp.name)}</span></div>
                             <div class="detail-line"><span>流派:${escapeHtml(pp.title||'-')}</span><span>门派:${escapeHtml(pp.school||'-')}</span></div>
                             <div class="detail-line"><span>造诣:${escapeHtml(pp.skill||'-')}</span><span>秒伤:${escapeHtml(pp.dps?.slice(0,15)||'-')}</span></div>
                             <div class="detail-line"><span>套装:${escapeHtml(pp.custom?.slice(0,12)||'-')}</span></div>`;
@@ -284,6 +326,8 @@
             document.getElementById('rankBtn').onclick=()=>{ document.getElementById('rightFuncPanel').classList.remove('open'); openRanking(); };
             document.getElementById('schoolSortBtn').onclick=()=>{ document.getElementById('rightFuncPanel').classList.remove('open'); openSchool(); };
             document.getElementById('factionSortBtn').onclick=()=>{ document.getElementById('rightFuncPanel').classList.remove('open'); openFaction(); };
+            
+            // 手机端按钮事件
             document.getElementById('mobileDetailBtn').onclick=()=>{ if(focusedPersonId){ updateMobileDetail(focusedPersonId); document.getElementById('mobileOverlay').classList.add('show'); } };
             document.getElementById('mobilePanelClose').onclick=()=>document.getElementById('mobileOverlay').classList.remove('show');
             document.getElementById('mobileOverlay').onclick=(e)=>{ if(e.target===document.getElementById('mobileOverlay')) document.getElementById('mobileOverlay').classList.remove('show'); };
@@ -292,6 +336,7 @@
             document.getElementById('mobileRankBtn').onclick=()=>{ document.getElementById('mobileDrawer').classList.remove('open'); openRanking(); };
             document.getElementById('mobileSchoolBtn').onclick=()=>{ document.getElementById('mobileDrawer').classList.remove('open'); openSchool(); };
             document.getElementById('mobileFactionBtn').onclick=()=>{ document.getElementById('mobileDrawer').classList.remove('open'); openFaction(); };
+            
             startSakura();
             fetch(DATA_URL).then(r=>r.json()).then(data=>{ persons=data.persons||[]; relations=data.relations||[]; focusedPersonId=persons.length?persons[0].id:null; persons.forEach(p=>{ floatState.set(p.id,{ phase:Math.random()*Math.PI*2, speed:0.0012+Math.random()*0.001, ampX:1.2+Math.random(), ampY:1.4+Math.random() }); }); if(focusedPersonId) updateDetailPanel(focusedPersonId); refreshFilter(); drawGraph(); }).catch(console.error);
         }
