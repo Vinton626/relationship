@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>缘</title>
+    <title>缘 · 师门关系图 v2.1.1</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
@@ -63,6 +63,15 @@
         .func-btn:hover { background: rgba(184,107,74,0.5); transform: scale(1.02); }
         .more-func-toggle { position: fixed; right: 0; top: 50%; transform: translateY(-50%); width: 40px; background: rgba(184,107,74,0.9); border-radius: 12px 0 0 12px; padding: 14px 6px; cursor: pointer; text-align: center; color: white; z-index: 140; writing-mode: vertical-rl; letter-spacing: 2px; }
         
+        /* 搜索框 */
+        .search-section { padding: 0 16px 12px 16px; border-bottom: 1px solid rgba(255,180,140,0.3); margin-bottom: 8px; }
+        .search-box { display: flex; align-items: center; background: rgba(0,0,0,0.3); border-radius: 40px; padding: 8px 16px; border: 1px solid rgba(255,180,150,0.3); }
+        .search-box i { color: #ffaa88; margin-right: 10px; }
+        .search-box input { background: none; border: none; color: #f0e6d8; font-size: 14px; flex: 1; outline: none; }
+        .search-box input::placeholder { color: #888; }
+        .search-box input:focus { border-color: #b86b4a; }
+        .search-tip { font-size: 10px; color: #888; margin-top: 6px; padding-left: 16px; }
+        
         /* 关系筛选浮窗 */
         .filter-btn { position: fixed; bottom: 20px; right: 20px; z-index: 1000; width: 52px; height: 52px; border-radius: 26px; background: #b86b4a; border: none; color: white; font-size: 22px; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
         .float-panel { position: fixed; bottom: 90px; right: 20px; z-index: 999; width: 260px; max-height: calc(100vh - 120px); background: rgba(20,18,35,0.92); backdrop-filter: blur(12px); border-radius: 20px; padding: 16px; border: 1px solid rgba(255,180,150,0.4); color: #f0e6d8; overflow-y: auto; opacity: 0; visibility: hidden; transition: opacity 0.2s, visibility 0.2s; }
@@ -104,6 +113,14 @@
         .sub-group { margin-left: 20px; margin-bottom: 16px; }
         .sub-title { font-size: 14px; color: #ffcfaa; margin: 8px 0 8px; padding-left: 8px; border-left: 2px solid #c87a58; }
         
+        .toast-message {
+            position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%);
+            background: rgba(0,0,0,0.8); color: #ffaa88; padding: 8px 16px;
+            border-radius: 30px; font-size: 13px; z-index: 3000;
+            animation: fadeOut 2s ease forwards; pointer-events: none;
+        }
+        @keyframes fadeOut { 0% { opacity: 1; } 70% { opacity: 1; } 100% { opacity: 0; visibility: hidden; } }
+        
         /* 手机端按钮布局 */
         @media (max-width: 768px) {
             .detail-panel { display: none; }
@@ -137,6 +154,14 @@
     <div class="more-func-toggle" id="moreFuncToggle"><i class="fas fa-chevron-left"></i><span>更多</span></div>
     <div class="right-function-panel" id="rightFuncPanel">
         <div class="right-panel-header"><h3><i class="fas fa-layer-group"></i> 更多功能</h3><button class="close-right-panel" id="closeRightPanel"><i class="fas fa-times"></i></button></div>
+        <!-- 搜索框 -->
+        <div class="search-section">
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" id="searchInput" placeholder="输入名字搜索人物..." autocomplete="off">
+            </div>
+            <div class="search-tip"><i class="fas fa-arrow-right"></i> 回车后自动聚焦</div>
+        </div>
         <div class="right-func-buttons">
             <div class="func-btn" id="rankBtn"><i class="fas fa-trophy"></i> 战斗排行榜</div>
             <div class="func-btn" id="schoolSortBtn"><i class="fas fa-flag-checkered"></i> 按流派分类</div>
@@ -167,7 +192,7 @@
         <div class="func-btn" id="mobileFactionBtn"><i class="fas fa-shield-alt"></i> 按门派分类</div>
     </div>
     
-    <div class="footer-note"><i class="fas fa-hand-pointer"></i> 点击圆点切换人物视角</div>
+    <div class="footer-note"><i class="fas fa-hand-pointer"></i> 点击圆点切换人物视角 | <i class="fas fa-search"></i> 右侧搜索框找同门</div>
 
     <script>
         const DATA_URL = 'https://Vinton626.github.io/relationship/data.json';
@@ -176,6 +201,27 @@
         
         let persons = [], relations = [], focusedPersonId = null, activeFilter = null;
         let floatState = new Map(), avatarCache = new Map();
+        
+        // 关系类型颜色映射
+        const relationColorMap = {
+            '师父': '#FFD700',      // 金色
+            '师娘': '#FFD700',
+            '徒弟': '#FFD700',
+            '徒媳': '#FFD700',
+            '侠缘': '#FF69B4',      // 粉色
+            '挚友': '#FF69B4',
+            '情缘': '#FF69B4',
+            '结义': '#FF69B4',
+            '默认': '#6a5a4e'       // 灰色
+        };
+        
+        function getRelationColor(relationName) {
+            if (!relationName) return relationColorMap['默认'];
+            for (let [key, color] of Object.entries(relationColorMap)) {
+                if (relationName.includes(key)) return color;
+            }
+            return relationColorMap['默认'];
+        }
         
         // 动画状态
         let animationState = {
@@ -213,13 +259,10 @@
         }
         
         function getSkillValue(p) { return p.skill ? extractNumber(p.skill) : 0; }
-        
-        // 秒伤排序：未记录的角色排在最后，有数值的按降序
         function getDpsValueForSort(p) {
             if(!p.dps || isInvalidDps(p.dps)) return -999999;
             return extractNumber(p.dps);
         }
-        
         function getDpsDisplayValue(p) {
             if(!p.dps) return '未记录';
             if(isInvalidDps(p.dps)) return '未记录';
@@ -228,7 +271,41 @@
             return num.toString();
         }
         
-        // 绘图核心函数 - 修复关系重叠问题
+        // 显示提示
+        function showToast(message) {
+            let oldToast = document.querySelector('.toast-message');
+            if(oldToast) oldToast.remove();
+            let toast = document.createElement('div');
+            toast.className = 'toast-message';
+            toast.innerHTML = `<i class="fas fa-info-circle"></i> ${message}`;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 2000);
+        }
+        
+        // 搜索并聚焦人物
+        function searchAndFocus() {
+            let input = document.getElementById('searchInput');
+            let keyword = input.value.trim();
+            if(!keyword) {
+                showToast('请输入要搜索的名字');
+                return;
+            }
+            let found = persons.find(p => p.name === keyword || p.name.includes(keyword));
+            if(found) {
+                if(found.id !== focusedPersonId) {
+                    animateFocusChange(found.id);
+                }
+                showToast(`✨ 已找到：${found.name}`);
+                input.value = '';
+                // 可选：关闭右侧面板
+                document.getElementById('rightFuncPanel').classList.remove('open');
+            } else {
+                showToast(`❌ 查无此人：${keyword}`);
+                input.value = '';
+            }
+        }
+        
+        // 绘图核心函数
         function getNodeRadius(isFocus, total) { const m=isMobile(); if(m) return isFocus?Math.max(15,21-Math.floor(total/12)):Math.max(10,15-Math.floor(total/14)); else return isFocus?Math.max(22,30-Math.floor(total/8)):Math.max(14,22-Math.floor(total/10)); }
         function getFloatOffset(pid, isFocus, now) { let f=floatState.get(pid); if(!f) return {x:0,y:0}; let t=now*f.speed+f.phase, s=isFocus?0.6:1, a=isMobile()?0.7:1; return {x:Math.sin(t)*f.ampX*s*a, y:Math.cos(t*1.13)*f.ampY*s*a}; }
         
@@ -241,7 +318,6 @@
             if(!cnt) return m;
             let mobile=isMobile(), baseR=Math.min(w,h), r1=mobile?baseR*0.40:baseR*0.28, r2=mobile?baseR*0.54:baseR*0.40, cap=Math.min(12,cnt);
             others.forEach((p,i)=>{ let ring1=i<cap, r=ring1?r1:r2, ringCnt=ring1?cap:cnt-cap, step=ringCnt?Math.PI*2/ringCnt:0, ang=-Math.PI/2+(ring1?i:i-cap)*step, x=w/2+Math.cos(ang)*r, y=h/2+Math.sin(ang)*r, margin=mobile?40:60; x=Math.min(w-margin,Math.max(margin,x)); y=Math.min(h-margin,Math.max(margin,y)); m.set(p.id,{x,y}); });
-            // 松弛迭代避免重叠
             let ids = [...m.keys()].filter(i=>i!==f);
             let minDist = getNodeRadius(false, persons.length) * 2 + (mobile?8:12);
             for(let iter=0;iter<12;iter++){
@@ -268,13 +344,11 @@
         function drawCurve(ctx,fx,fy,tx,ty,off,c,w){ let dx=tx-fx,dy=ty-fy,d=Math.hypot(dx,dy); if(d<1)return; let px=-dy/d,py=dx/d; ctx.beginPath(); ctx.moveTo(fx,fy); ctx.bezierCurveTo(fx+dx*0.33+px*off,fy+dy*0.33+py*off,fx+dx*0.67+px*off,fy+dy*0.67+py*off,tx,ty); ctx.strokeStyle=c; ctx.lineWidth=w; ctx.stroke(); }
         function drawArrowAtEnd(ctx,fx,fy,tx,ty,off,c){ let dx=tx-fx,dy=ty-fy,d=Math.hypot(dx,dy); if(d<1)return; let a=Math.atan2(dy,dx), px=-dy/d,py=dx/d, arrowSize=isMobile()?10:14, x=tx-arrowSize*Math.cos(a)+px*off*0.3, y=ty-arrowSize*Math.sin(a)+py*off*0.3; ctx.save(); ctx.translate(x,y); ctx.rotate(a); ctx.beginPath(); ctx.moveTo(arrowSize*0.5,0); ctx.lineTo(-arrowSize*0.35,-arrowSize*0.3); ctx.lineTo(-arrowSize*0.35,arrowSize*0.3); ctx.fillStyle=c; ctx.fill(); ctx.restore(); }
         
-        // 修复关系重叠：为每条关系计算独立的偏移曲线和文字位置
         function drawRelationName(ctx, text, fx, fy, tx, ty, curveOffset, textColor, laneOffset = 0) {
             let dx = tx - fx, dy = ty - fy, d = Math.hypot(dx, dy);
             if(d < 1 || !text) return;
             let px = -dy / d, py = dx / d;
             let tx_dir = dx / d, ty_dir = dy / d;
-            // 曲线中点位置 + 横向偏移（laneOffset 让不同关系错开）
             let mx = fx + dx * 0.5 + px * curveOffset + tx_dir * laneOffset;
             let my = fy + dy * 0.5 + py * curveOffset + ty_dir * laneOffset;
             let fontSize = isMobile() ? 10 : 11;
@@ -302,21 +376,17 @@
             }; 
         }
         
-        // 为每个关系对分配不同的偏移（避免重叠）
         function buildRelationOffsets(rels, focusId) {
             let map = new Map();
-            // 按 sourceId -> targetId 分组
             let groups = new Map();
             rels.forEach(r => {
                 let key = `${Math.min(r.sourceId, r.targetId)}-${Math.max(r.sourceId, r.targetId)}`;
                 if(!groups.has(key)) groups.set(key, []);
                 groups.get(key).push(r);
             });
-            // 为每组关系分配不同的偏移量
             groups.forEach(group => {
                 let count = group.length;
                 group.forEach((r, idx) => {
-                    // 根据索引计算偏移量，让关系文字和曲线分开
                     let lane = idx - (count - 1) / 2;
                     let curveBase = isMobile() ? 12 : 18;
                     let shiftBase = isMobile() ? 15 : 25;
@@ -336,17 +406,16 @@
             if(activeFilter) rels = rels.filter(r => r.name === activeFilter);
             let offMap = buildRelationOffsets(rels, focusId);
             
-            // 先画曲线和箭头
             rels.forEach(r => {
                 let s = posMap.get(r.sourceId), t = posMap.get(r.targetId);
                 if(!s || !t) return;
                 let off = offMap.get(r.id)?.curve || 12;
-                let col = (r.sourceId === focusId || r.targetId === focusId) ? "#ffcc99" : "#6a5a4e";
+                let relationColor = getRelationColor(r.name);
+                let col = (r.sourceId === focusId || r.targetId === focusId) ? relationColor : relationColorMap['默认'];
                 let lw = (r.sourceId === focusId || r.targetId === focusId) ? (isMobile() ? 2.5 : 3) : (isMobile() ? 1.2 : 1.8);
                 drawCurve(ctx, s.x, s.y, t.x, t.y, off, col, lw);
                 drawArrowAtEnd(ctx, s.x, s.y, t.x, t.y, off, col);
             });
-            // 再画关系文字
             rels.forEach(r => {
                 let s = posMap.get(r.sourceId), t = posMap.get(r.targetId);
                 if(!s || !t || !r.name) return;
@@ -355,7 +424,6 @@
                 let col = (r.sourceId === focusId || r.targetId === focusId) ? "#ffdd99" : "#ccaa88";
                 drawRelationName(ctx, r.name, s.x, s.y, t.x, t.y, off, col, shift);
             });
-            // 画节点
             posMap.forEach((pos,id) => {
                 let p = persons.find(x => x.id === id);
                 if(!p) return;
@@ -404,7 +472,8 @@
                 let s = disp.get(r.sourceId), t = disp.get(r.targetId);
                 if(!s || !t) return;
                 let off = offMap.get(r.id)?.curve || 12;
-                let col = (r.sourceId === f || r.targetId === f) ? "#ffcc99" : "#6a5a4e";
+                let relationColor = getRelationColor(r.name);
+                let col = (r.sourceId === f || r.targetId === f) ? relationColor : relationColorMap['默认'];
                 let lw = (r.sourceId === f || r.targetId === f) ? (isMobile() ? 2.5 : 3) : (isMobile() ? 1.2 : 1.8);
                 drawCurve(ctx, s.x, s.y, t.x, t.y, off, col, lw);
                 drawArrowAtEnd(ctx, s.x, s.y, t.x, t.y, off, col);
@@ -546,7 +615,6 @@
                     if(sortType === 'skill') {
                         sorted.sort((a,b) => (getSkillValue(b) - getSkillValue(a)));
                     } else {
-                        // 秒伤排序：未记录的角色排在最后
                         sorted.sort((a,b) => {
                             let aVal = getDpsValueForSort(a);
                             let bVal = getDpsValueForSort(b);
@@ -600,7 +668,7 @@
                             let grid = subDiv.querySelector('.person-grid');
                             mems.forEach(m => {
                                 let card = document.createElement('div'); card.className = 'person-card';
-                                card.innerHTML = `<div class="name">${escapeHtml(m.name)}</div><div class="detail-line">造诣: ${escapeHtml(m.skill?.slice(0,10)||'-')}</div><div class="detail-line">秒伤: ${getDpsDisplayValue(m)}</div>`;
+                                card.innerHTML = `<div class="name">${escapeHtml(m.name)}</div><div class="detail-line">造诣: ${escapeHtml(m.skill||'-')}</div><div class="detail-line">秒伤: ${getDpsDisplayValue(m)}</div>`;
                                 card.onclick = () => window.showPersonModal(m.id);
                                 grid.appendChild(card);
                             });
@@ -636,6 +704,11 @@
             document.getElementById('rankBtn').onclick=()=>{ document.getElementById('rightFuncPanel').classList.remove('open'); openRanking(); };
             document.getElementById('schoolSortBtn').onclick=()=>{ document.getElementById('rightFuncPanel').classList.remove('open'); openSchool(); };
             document.getElementById('factionSortBtn').onclick=()=>{ document.getElementById('rightFuncPanel').classList.remove('open'); openFaction(); };
+            
+            // 搜索框事件
+            let searchInput = document.getElementById('searchInput');
+            searchInput.addEventListener('keypress', (e) => { if(e.key === 'Enter') searchAndFocus(); });
+            
             document.getElementById('mobileDetailBtn').onclick=()=>{ if(focusedPersonId){ updateMobileDetail(focusedPersonId); document.getElementById('mobileOverlay').classList.add('show'); } };
             document.getElementById('mobilePanelClose').onclick=()=>document.getElementById('mobileOverlay').classList.remove('show');
             document.getElementById('mobileOverlay').onclick=(e)=>{ if(e.target===document.getElementById('mobileOverlay')) document.getElementById('mobileOverlay').classList.remove('show'); };
