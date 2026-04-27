@@ -45,6 +45,17 @@
       "book": "6扶摇直上6易水歌5三穷致知4擒天势"
     },
     {
+      "id": 5,
+      "name": "蓝暮馨",
+      "title": "鸢鸢（正在养成中）",
+      "school": "",
+      "color": "#d9a7c7",
+      "skill": "养成中",
+      "dps": "",
+      "custom": "",
+      "book": ""
+    },
+    {
       "id": 6,
       "name": "绾月尘",
       "title": "玉玉",
@@ -105,7 +116,7 @@
       "title": "虹虹",
       "school": "九流门",
       "color": "#d9a7c7",
-      "skill": "4.319鹅",
+      "skill": "4.399鹅",
       "dps": "72864(玉+秋+火+/)",
       "custom": "玉斗易相",
       "book": "6无名心法6易水歌6千山法6威猛歌"
@@ -767,6 +778,54 @@
       "sourceId": 21,
       "targetId": 23,
       "name": "大徒弟"
+    },
+    {
+      "id": 132,
+      "sourceId": 2,
+      "targetId": 5,
+      "name": "四徒弟"
+    },
+    {
+      "id": 133,
+      "sourceId": 5,
+      "targetId": 2,
+      "name": "师父"
+    },
+    {
+      "id": 134,
+      "sourceId": 5,
+      "targetId": 6,
+      "name": "二师兄"
+    },
+    {
+      "id": 135,
+      "sourceId": 6,
+      "targetId": 5,
+      "name": "四师妹"
+    },
+    {
+      "id": 136,
+      "sourceId": 5,
+      "targetId": 7,
+      "name": "三师兄"
+    },
+    {
+      "id": 137,
+      "sourceId": 7,
+      "targetId": 5,
+      "name": "四师妹"
+    },
+    {
+      "id": 138,
+      "sourceId": 5,
+      "targetId": 15,
+      "name": "大师兄"
+    },
+    {
+      "id": 139,
+      "sourceId": 15,
+      "targetId": 5,
+      "name": "四师妹"
     }
   ]
 }
