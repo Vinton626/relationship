@@ -62,6 +62,27 @@
         .right-panel-header { padding: 20px 16px 12px; border-bottom: 1px solid rgba(255,180,140,0.3); display: flex; justify-content: space-between; align-items: center; }
         .right-panel-header h3 { color: #ffdd99; font-size: 18px; }
         .close-right-panel { background: none; border: none; color: #ffaa88; font-size: 24px; cursor: pointer; }
+        
+        /* 图例按钮 */
+        .legend-btn {
+            background: rgba(184,107,74,0.8); border: none; color: white; width: 36px; height: 36px;
+            border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center;
+            font-size: 18px; transition: 0.2s; box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        }
+        .legend-btn:hover { background: #d47a55; transform: scale(1.05); }
+        .pc-legend-btn { position: fixed; top: 20px; right: 20px; z-index: 160; }
+        .mobile-legend-btn { position: fixed; top: 20px; left: 20px; z-index: 1001; width: 40px; height: 40px; background: #b86b4a; border-radius: 50%; display: none; align-items: center; justify-content: center; color: white; font-size: 18px; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
+        @media (max-width: 768px) {
+            .pc-legend-btn { display: none; }
+            .mobile-legend-btn { display: flex; }
+        }
+        
+        /* 图例弹窗 */
+        .legend-modal .legend-content { display: flex; flex-direction: column; gap: 12px; }
+        .legend-item { display: flex; align-items: center; gap: 12px; font-size: 14px; }
+        .legend-color { width: 24px; height: 24px; border-radius: 4px; }
+        .legend-text { color: #f0e6d8; }
+        
         .right-func-buttons { padding: 16px; display: flex; flex-direction: column; gap: 12px; }
         .func-btn { background: rgba(184,107,74,0.2); border: 1px solid #c87a58; border-radius: 40px; padding: 12px; font-size: 15px; font-weight: 500; color: #ffcfaa; cursor: pointer; text-align: center; display: flex; align-items: center; justify-content: center; gap: 8px; }
         .func-btn:hover { background: rgba(184,107,74,0.5); transform: scale(1.02); }
@@ -92,13 +113,16 @@
         
         /* 弹窗样式 */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 2000; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(8px); }
-        .modal-container { background: rgba(25,22,45,0.98); backdrop-filter: blur(20px); border-radius: 28px; width: 90%; max-width: 900px; max-height: 85vh; display: flex; flex-direction: column; border: 1px solid rgba(255,180,150,0.5); }
+        .modal-container { background: rgba(25,22,45,0.98); backdrop-filter: blur(20px); border-radius: 28px; width: 90%; max-width: 500px; max-height: 85vh; display: flex; flex-direction: column; border: 1px solid rgba(255,180,150,0.5); }
         .modal-header { padding: 16px 20px; border-bottom: 1px solid rgba(255,180,140,0.3); display: flex; justify-content: space-between; align-items: center; }
         .modal-header h2 { color: #ffdd99; font-size: 20px; }
         .modal-close { background: none; border: none; color: #ffaa88; font-size: 28px; cursor: pointer; }
         .modal-body { padding: 16px 20px; overflow-y: auto; flex: 1; color: #f0e6d8; }
-        .modal-body .person-card .name { color: #ffdd99 !important; }
-        .modal-body .detail-line { color: #ccaa88 !important; }
+        
+        /* 图片放大模态框 */
+        .image-modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 3000; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+        .image-modal-container { max-width: 90vw; max-height: 90vh; }
+        .image-modal-container img { max-width: 100%; max-height: 90vh; object-fit: contain; border-radius: 12px; box-shadow: 0 0 30px rgba(0,0,0,0.5); }
         
         /* 排行榜筛选栏 */
         .rank-filters { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 1px solid rgba(255,180,140,0.3); align-items: center; }
@@ -146,17 +170,18 @@
         .mobile-overlay.show { display: flex; }
         .mobile-panel { width: 100%; max-height: 75%; background: rgba(20,18,35,0.98); backdrop-filter: blur(20px); border-radius: 24px 24px 0 0; padding: 20px; overflow-y: auto; color: #f0e6d8; }
         
-        /* 底部提示文字 - 默认电脑端显示 */
         .footer-note { position: fixed; bottom: 12px; left: 50%; transform: translateX(-50%); color: rgba(255,255,255,0.5); font-size: 0.7rem; z-index: 10; white-space: nowrap; pointer-events: none; }
-        /* 手机端覆盖 */
-        @media (max-width: 768px) {
-            .footer-note { font-size: 0.65rem; white-space: nowrap; }
-        }
+        @media (max-width: 768px) { .footer-note { font-size: 0.65rem; white-space: nowrap; } }
     </style>
 </head>
 <body>
     <canvas id="sakuraCanvas"></canvas>
     <canvas id="graphCanvas"></canvas>
+    
+    <!-- 电脑端图例按钮（右上角） -->
+    <button class="legend-btn pc-legend-btn" id="pcLegendBtn"><i class="fas fa-palette"></i></button>
+    <!-- 手机端图例按钮（左上角） -->
+    <button class="mobile-legend-btn" id="mobileLegendBtn"><i class="fas fa-palette"></i></button>
     
     <div class="detail-panel" id="detailPanel">
         <div class="panel-tab" id="panelTab"><i class="fas fa-chevron-left"></i><span>详 情</span></div>
@@ -166,7 +191,6 @@
     <div class="more-func-toggle" id="moreFuncToggle"><i class="fas fa-chevron-left"></i><span>更多</span></div>
     <div class="right-function-panel" id="rightFuncPanel">
         <div class="right-panel-header"><h3><i class="fas fa-layer-group"></i> 更多功能</h3><button class="close-right-panel" id="closeRightPanel"><i class="fas fa-times"></i></button></div>
-        <!-- 搜索框 - placeholder改为"搜索自己" -->
         <div class="search-section">
             <div class="search-box">
                 <i class="fas fa-search"></i>
@@ -187,7 +211,6 @@
         <div class="section"><div class="section-title"><i class="fas fa-filter"></i> 关系筛选</div><div id="filterTags" class="filter-group"></div><button id="clearFilterBtn" class="clear-btn">清除筛选</button></div>
     </div>
     
-    <!-- 手机端按钮 -->
     <button class="mobile-detail-btn" id="mobileDetailBtn"><i class="fas fa-info-circle"></i></button>
     <button class="mobile-func-menu" id="mobileFuncBtn"><i class="fas fa-ellipsis-h"></i></button>
     
@@ -198,10 +221,8 @@
         </div>
     </div>
     
-    <!-- 手机端更多功能抽屉 - 添加搜索框 -->
     <div class="mobile-drawer" id="mobileDrawer">
         <div class="drawer-header"><span><i class="fas fa-tools"></i> 功能选择</span><button id="closeDrawer" style="background:none;border:none;color:#ffaa88;font-size:20px;"><i class="fas fa-times"></i></button></div>
-        <!-- 手机端搜索框 -->
         <div class="search-box" style="margin-bottom: 8px;">
             <i class="fas fa-search"></i>
             <input type="text" id="mobileSearchInput" placeholder="搜索自己..." autocomplete="off" style="background:none;border:none;color:#f0e6d8;flex:1;outline:none;">
@@ -211,7 +232,6 @@
         <div class="func-btn" id="mobileFactionBtn"><i class="fas fa-shield-alt"></i> 按门派分类</div>
     </div>
     
-    <!-- 底部提示文字 - 通过JS动态设置不同内容 -->
     <div class="footer-note" id="footerNote"></div>
 
     <script>
@@ -222,10 +242,15 @@
         let persons = [], relations = [], focusedPersonId = null, activeFilter = null;
         let floatState = new Map(), avatarCache = new Map();
         
-        // 关系类型颜色映射（基于关键词匹配，不写死）
+        // 关系类型颜色映射（基于关键词匹配）
         function getRelationColor(relationName) {
-            if (!relationName) return '#6a5a4e';
+            if (!relationName) return '#B0B0B0'; // 浅灰色
             const name = relationName;
+            // 大房~六房 → 粉色
+            if (name.includes('大房') || name.includes('二房') || name.includes('三房') || 
+                name.includes('四房') || name.includes('五房') || name.includes('六房')) return '#FF69B4';
+            // 情敌 → 红色
+            if (name.includes('情敌')) return '#FF4444';
             // 包含"徒弟" → 金色
             if (name.includes('徒弟')) return '#FFD700';
             // 包含"师父"或"师娘" → 金色
@@ -238,8 +263,32 @@
             if (name.includes('结义')) return '#87CEEB';
             // 包含"自己" → 白色
             if (name.includes('自己')) return '#FFFFFF';
-            // 默认灰色
-            return '#6a5a4e';
+            // 默认浅灰色
+            return '#B0B0B0';
+        }
+        
+        // 图例数据
+        const legendItems = [
+            { color: '#FFD700', text: '师父、师娘、徒弟' },
+            { color: '#90EE90', text: '师兄、师弟、师姐、师妹' },
+            { color: '#FF69B4', text: '侠缘、情缘、大房~六房' },
+            { color: '#87CEEB', text: '结义' },
+            { color: '#FF4444', text: '情敌' },
+            { color: '#FFFFFF', text: '自己' },
+            { color: '#B0B0B0', text: '其他关系' }
+        ];
+        
+        // 显示图例弹窗
+        function showLegend() {
+            showModal('🎨 关系图例', (container) => {
+                container.className = 'legend-content';
+                container.innerHTML = legendItems.map(item => `
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: ${item.color}; box-shadow: 0 0 4px ${item.color};"></div>
+                        <div class="legend-text">${item.text}</div>
+                    </div>
+                `).join('');
+            });
         }
         
         // 动画状态
@@ -262,6 +311,15 @@
         
         function getAvatarUrl(id) { return IMAGE_FORMATS.map(f => `${IMAGE_BASE_URL}playerid_${id}.${f}`); }
         function loadAvatar(id, cb) { let urls = getAvatarUrl(id), idx=0; (function tryNext(){ if(idx>=urls.length){ cb(null); return; } let img=new Image(); img.onload=()=>cb(img); img.onerror=()=>{ idx++; tryNext(); }; img.src=urls[idx]; })(); }
+        
+        // 图片放大显示
+        function showImageModal(imageUrl) {
+            const modalDiv = document.createElement('div');
+            modalDiv.className = 'image-modal-overlay';
+            modalDiv.innerHTML = `<div class="image-modal-container"><img src="${imageUrl}" alt="放大图片"></div>`;
+            document.body.appendChild(modalDiv);
+            modalDiv.onclick = () => modalDiv.remove();
+        }
         
         // 判断是否为无效秒伤
         function isInvalidDps(str) {
@@ -290,7 +348,6 @@
             return num.toString();
         }
         
-        // 显示提示
         function showToast(message) {
             let oldToast = document.querySelector('.toast-message');
             if(oldToast) oldToast.remove();
@@ -301,22 +358,14 @@
             setTimeout(() => toast.remove(), 2000);
         }
         
-        // 搜索并聚焦人物（共用逻辑）
         function searchAndFocus(searchValue, closeDrawer = false) {
             let keyword = searchValue.trim();
-            if(!keyword) {
-                showToast('请输入要搜索的名字');
-                return false;
-            }
+            if(!keyword) { showToast('请输入要搜索的名字'); return false; }
             let found = persons.find(p => p.name === keyword || p.name.includes(keyword));
             if(found) {
-                if(found.id !== focusedPersonId) {
-                    animateFocusChange(found.id);
-                }
+                if(found.id !== focusedPersonId) animateFocusChange(found.id);
                 showToast(`✨ 已找到：${found.name}`);
-                if(closeDrawer) {
-                    document.getElementById('mobileDrawer').classList.remove('open');
-                }
+                if(closeDrawer) document.getElementById('mobileDrawer').classList.remove('open');
                 return true;
             } else {
                 showToast(`❌ 查无此人：${keyword}`);
@@ -430,7 +479,7 @@
                 if(!s || !t) return;
                 let off = offMap.get(r.id)?.curve || 12;
                 let relationColor = getRelationColor(r.name);
-                let col = (r.sourceId === focusId || r.targetId === focusId) ? relationColor : '#6a5a4e';
+                let col = (r.sourceId === focusId || r.targetId === focusId) ? relationColor : '#B0B0B0';
                 let lw = (r.sourceId === focusId || r.targetId === focusId) ? (isMobile() ? 2.5 : 3) : (isMobile() ? 1.2 : 1.8);
                 drawCurve(ctx, s.x, s.y, t.x, t.y, off, col, lw);
                 drawArrowAtEnd(ctx, s.x, s.y, t.x, t.y, off, col);
@@ -492,7 +541,7 @@
                 if(!s || !t) return;
                 let off = offMap.get(r.id)?.curve || 12;
                 let relationColor = getRelationColor(r.name);
-                let col = (r.sourceId === f || r.targetId === f) ? relationColor : '#6a5a4e';
+                let col = (r.sourceId === f || r.targetId === f) ? relationColor : '#B0B0B0';
                 let lw = (r.sourceId === f || r.targetId === f) ? (isMobile() ? 2.5 : 3) : (isMobile() ? 1.2 : 1.8);
                 drawCurve(ctx, s.x, s.y, t.x, t.y, off, col, lw);
                 drawArrowAtEnd(ctx, s.x, s.y, t.x, t.y, off, col);
@@ -537,7 +586,6 @@
             ctx.shadowBlur = 0;
         }
         
-        // 动画切换
         function easeOutCubic(t) { return 1 - Math.pow(1 - t, 3); }
         
         function animateFocusChange(newFocusId) {
@@ -591,7 +639,17 @@
             drawGraph();
         }
         
-        function updateDetailPanel(id){ let p=persons.find(p=>p.id===id); if(!p)return; let rels=relations.filter(r=>r.sourceId===id||r.targetId===id); let relHtml=rels.map(r=>{ let oid=r.sourceId===id?r.targetId:r.sourceId; let o=persons.find(px=>px.id===oid); return `<div class="relation-item"><strong>${escapeHtml(r.name)}</strong> ${r.sourceId===id?'→':'←'} ${escapeHtml(o?.name||'未知')}</div>`; }).join('')||'<div>无关系</div>'; let avatarHtml=`<div class="person-avatar" id="pc-avatar-${p.id}" onclick="window.showPersonModal(${p.id})"><div class="avatar-placeholder"><i class="fas fa-spinner fa-pulse"></i><span>加载中...</span></div></div>`; let combatHtml=`<div class="combat-btn" id="combatToggleBtn-${p.id}" onclick="toggleCombatDetail(${p.id})"><i class="fas fa-chart-simple"></i> <span id="combatBtnText-${p.id}">显示战力详情</span></div><div class="combat-detail-panel" id="combatPanel-${p.id}"><div class="combat-item"><div class="combat-label">套装</div><div class="combat-value">${escapeHtml(p.custom||'未配置')}</div></div><div class="combat-item"><div class="combat-label">心法</div><div class="combat-value">${escapeHtml(p.book||'未配置')}</div></div><div class="combat-item"><div class="combat-label">最高造诣</div><div class="combat-value">${escapeHtml(p.skill||'未记录')}</div></div><div class="combat-item"><div class="combat-label">最高秒伤</div><div class="combat-value">${getDpsDisplayValue(p)}</div></div><div class="notice-text"><i class="fas fa-info-circle"></i><span>秒伤括号内容为食物、服帖、天工、精元缩写</span></div></div>`; let html=`${avatarHtml}<div class="info-section"><div class="person-name">${escapeHtml(p.name)}</div><div class="info-row"><div class="info-label">流派</div><div class="info-value">${escapeHtml(p.title||'未设置')}</div></div><div class="info-row"><div class="info-label">门派</div><div class="info-value">${escapeHtml(p.school||'未知')}</div></div><div class="info-row"><div class="info-label">关系数</div><div class="info-value">${rels.length}条</div></div>${combatHtml}<div style="font-size:12px;color:#ffaa88;margin:12px 0 8px;">关系列表</div><div class="relation-list">${relHtml}</div></div>`; document.getElementById('detailContent').innerHTML=html; loadAvatar(p.id,(img)=>{ let c=document.getElementById(`pc-avatar-${p.id}`); if(c&&img){ c.innerHTML=''; let im=document.createElement('img'); im.src=img.src; im.style.width='100%'; c.appendChild(im); } }); }
+        function updateDetailPanel(id){ 
+            let p=persons.find(p=>p.id===id); if(!p)return; 
+            let rels=relations.filter(r=>r.sourceId===id||r.targetId===id); 
+            let relHtml=rels.map(r=>{ let oid=r.sourceId===id?r.targetId:r.sourceId; let o=persons.find(px=>px.id===oid); return `<div class="relation-item"><strong>${escapeHtml(r.name)}</strong> ${r.sourceId===id?'→':'←'} ${escapeHtml(o?.name||'未知')}</div>`; }).join('')||'<div>无关系</div>'; 
+            let avatarHtml=`<div class="person-avatar" id="pc-avatar-${p.id}"><div class="avatar-placeholder"><i class="fas fa-spinner fa-pulse"></i><span>加载中...</span></div></div>`; 
+            let combatHtml=`<div class="combat-btn" id="combatToggleBtn-${p.id}" onclick="toggleCombatDetail(${p.id})"><i class="fas fa-chart-simple"></i> <span id="combatBtnText-${p.id}">显示战力详情</span></div><div class="combat-detail-panel" id="combatPanel-${p.id}"><div class="combat-item"><div class="combat-label">套装</div><div class="combat-value">${escapeHtml(p.custom||'未配置')}</div></div><div class="combat-item"><div class="combat-label">心法</div><div class="combat-value">${escapeHtml(p.book||'未配置')}</div></div><div class="combat-item"><div class="combat-label">最高造诣</div><div class="combat-value">${escapeHtml(p.skill||'未记录')}</div></div><div class="combat-item"><div class="combat-label">最高秒伤</div><div class="combat-value">${getDpsDisplayValue(p)}</div></div><div class="notice-text"><i class="fas fa-info-circle"></i><span>秒伤括号内容为食物、服帖、天工、精元缩写</span></div></div>`; 
+            let html=`${avatarHtml}<div class="info-section"><div class="person-name">${escapeHtml(p.name)}</div><div class="info-row"><div class="info-label">流派</div><div class="info-value">${escapeHtml(p.title||'未设置')}</div></div><div class="info-row"><div class="info-label">门派</div><div class="info-value">${escapeHtml(p.school||'未知')}</div></div><div class="info-row"><div class="info-label">关系数</div><div class="info-value">${rels.length}条</div></div>${combatHtml}<div style="font-size:12px;color:#ffaa88;margin:12px 0 8px;">关系列表</div><div class="relation-list">${relHtml}</div></div>`; 
+            document.getElementById('detailContent').innerHTML=html; 
+            loadAvatar(p.id,(img)=>{ let c=document.getElementById(`pc-avatar-${p.id}`); if(c&&img){ c.innerHTML=''; c.style.background='transparent'; let im=document.createElement('img'); im.src=img.src; im.style.width='100%'; im.style.cursor='pointer'; im.onclick=(e)=>{ e.stopPropagation(); showImageModal(img.src); }; c.appendChild(im); } else if(c){ c.innerHTML='<div class="avatar-placeholder"><i class="fas fa-image"></i><span>暂无图片</span></div>'; c.onclick=()=>showToast('暂无图片'); } }); 
+        }
+        
         window.toggleCombatDetail = function(personId) { let panel = document.getElementById(`combatPanel-${personId}`); let btnSpan = document.getElementById(`combatBtnText-${personId}`); if(panel) { if(panel.classList.contains('show')) { panel.classList.remove('show'); if(btnSpan) btnSpan.innerText = '显示战力详情'; } else { panel.classList.add('show'); if(btnSpan) btnSpan.innerText = '隐藏战力详情'; } } };
         
         function onClickCanvas(e){ if(animationState.isAnimating||!persons.length)return; let rect=canvas.getBoundingClientRect(), sx=canvas.width/rect.width, sy=canvas.height/rect.height, x=(e.clientX-rect.left)*sx, y=(e.clientY-rect.top)*sy, f=focusedPersonId||persons[0].id, base=computePositions(f), disp=applyFloat(base,f,performance.now()), hit=null; disp.forEach((pos,id)=>{ let r=getNodeRadius(id===f,persons.length); if(Math.hypot(x-pos.x,y-pos.y)<=r+8) hit=id; }); if(hit && hit!==focusedPersonId) animateFocusChange(hit); }
@@ -603,63 +661,41 @@
         
         // 弹窗系统
         function showModal(title, buildContent) { let old=document.getElementById('dynamicModal'); if(old) old.remove(); let div=document.createElement('div'); div.className='modal-overlay'; div.id='dynamicModal'; div.innerHTML=`<div class="modal-container"><div class="modal-header"><h2>${escapeHtml(title)}</h2><button class="modal-close">&times;</button></div><div class="modal-body" id="modalBody"></div></div>`; document.body.appendChild(div); buildContent(div.querySelector('#modalBody')); div.querySelector('.modal-close').onclick=()=>div.remove(); div.onclick=(e)=>{ if(e.target===div) div.remove(); }; }
+        
         window.showPersonModal = function(id) { 
             let p=persons.find(p=>p.id===id); if(!p)return; 
             showModal(p.name, (container)=>{ 
                 container.innerHTML=`<div style="display:flex;flex-direction:column;align-items:center;"><div id="popAv-${p.id}" style="width:100px;height:100px;border-radius:20px;overflow:hidden;background:#2a2545;margin-bottom:12px;"><div class="avatar-placeholder" style="padding:30px;"><i class="fas fa-spinner fa-pulse"></i></div></div><div style="font-size:20px;font-weight:bold;color:#ffdd99;">${escapeHtml(p.name)}</div><div style="background:rgba(0,0,0,0.3);padding:12px;border-radius:16px;width:100%;margin-top:12px;color:#f0e6d8;"><div><span style="color:#ffaa88;">流派：</span> ${escapeHtml(p.title||'-')}</div><div><span style="color:#ffaa88;">门派：</span> ${escapeHtml(p.school||'-')}</div><div><span style="color:#ffaa88;">套装：</span> ${escapeHtml(p.custom||'-')}</div><div><span style="color:#ffaa88;">心法：</span> ${escapeHtml(p.book||'-')}</div><div><span style="color:#ffaa88;">最高造诣：</span> ${escapeHtml(p.skill||'-')}</div><div><span style="color:#ffaa88;">最高秒伤：</span> ${getDpsDisplayValue(p)}</div></div></div>`; 
-                loadAvatar(p.id,(img)=>{ let box=document.getElementById(`popAv-${p.id}`); if(box&&img){ box.innerHTML=''; let im=document.createElement('img'); im.src=img.src; im.style.width='100%'; im.style.height='100%'; im.style.objectFit='cover'; box.appendChild(im); } }); 
+                loadAvatar(p.id,(img)=>{ let box=document.getElementById(`popAv-${p.id}`); if(box&&img){ box.innerHTML=''; let im=document.createElement('img'); im.src=img.src; im.style.width='100%'; im.style.height='100%'; im.style.objectFit='cover'; im.style.cursor='pointer'; im.onclick=(e)=>{ e.stopPropagation(); showImageModal(img.src); }; box.appendChild(im); } }); 
             }); 
         };
         
-        // 战斗排行榜
+        // 排行榜等功能
         function openRanking(){ 
             showModal('战斗排行榜', (body)=>{ 
                 let sortType = 'skill';
                 let schoolFilter = 'all';
-                
                 let filterBar = document.createElement('div'); filterBar.className = 'rank-filters';
-                filterBar.innerHTML = `
-                    <div class="rank-tabs"><button class="rank-tab active" data-sort="skill">🏆 按造诣排序</button><button class="rank-tab" data-sort="dps">⚡ 按秒伤排序</button></div>
-                    <div class="rank-filter-group"><label>📌 流派筛选</label><select id="schoolSelect"><option value="all">全部</option>${[...new Set(persons.map(p=>p.title||'未指定'))].map(s=>`<option value="${escapeHtml(s)}">${escapeHtml(s)}</option>`).join('')}</select></div>
-                `;
+                filterBar.innerHTML = `<div class="rank-tabs"><button class="rank-tab active" data-sort="skill">🏆 按造诣排序</button><button class="rank-tab" data-sort="dps">⚡ 按秒伤排序</button></div><div class="rank-filter-group"><label>📌 流派筛选</label><select id="schoolSelect"><option value="all">全部</option>${[...new Set(persons.map(p=>p.title||'未指定'))].map(s=>`<option value="${escapeHtml(s)}">${escapeHtml(s)}</option>`).join('')}</select></div>`;
                 body.appendChild(filterBar);
                 let listDiv = document.createElement('div'); body.appendChild(listDiv);
-                
                 function render() {
-                    let filtered = persons.filter(p => {
-                        if(schoolFilter !== 'all' && (p.title||'未指定') !== schoolFilter) return false;
-                        return true;
-                    });
+                    let filtered = persons.filter(p => { if(schoolFilter !== 'all' && (p.title||'未指定') !== schoolFilter) return false; return true; });
                     let sorted = [...filtered];
-                    if(sortType === 'skill') {
-                        sorted.sort((a,b) => (getSkillValue(b) - getSkillValue(a)));
-                    } else {
-                        sorted.sort((a,b) => {
-                            let aVal = getDpsValueForSort(a);
-                            let bVal = getDpsValueForSort(b);
-                            return bVal - aVal;
-                        });
-                    }
-                    
+                    if(sortType === 'skill') sorted.sort((a,b) => (getSkillValue(b) - getSkillValue(a)));
+                    else sorted.sort((a,b) => { let aVal = getDpsValueForSort(a), bVal = getDpsValueForSort(b); return bVal - aVal; });
                     let grid = document.createElement('div'); grid.className = 'person-grid';
                     sorted.forEach((pp, idx) => {
                         let card = document.createElement('div'); card.className = 'person-card';
-                        let rankNum = idx + 1;
-                        let rankColor = rankNum <= 3 ? '#ffaa66' : '#b86b4a';
-                        let dpsDisplay = getDpsDisplayValue(pp);
-                        card.innerHTML = `<div><span class="rank-badge" style="background: ${rankColor};">${rankNum}</span><span class="name">${escapeHtml(pp.name)}</span></div>
-                            <div class="detail-line"><span>流派: ${escapeHtml(pp.title||'-')}</span><span>门派: ${escapeHtml(pp.school||'-')}</span></div>
-                            <div class="detail-line"><span>造诣: ${escapeHtml(pp.skill||'-')}</span><span>秒伤: ${dpsDisplay}</span></div>
-                            <div class="detail-line"><span>套装: ${escapeHtml(pp.custom?.slice(0,12)||'-')}</span></div>`;
+                        let rankNum = idx + 1, rankColor = rankNum <= 3 ? '#ffaa66' : '#b86b4a';
+                        card.innerHTML = `<div><span class="rank-badge" style="background: ${rankColor};">${rankNum}</span><span class="name">${escapeHtml(pp.name)}</span></div><div class="detail-line"><span>流派: ${escapeHtml(pp.title||'-')}</span><span>门派: ${escapeHtml(pp.school||'-')}</span></div><div class="detail-line"><span>造诣: ${escapeHtml(pp.skill||'-')}</span><span>秒伤: ${getDpsDisplayValue(pp)}</span></div><div class="detail-line"><span>套装: ${escapeHtml(pp.custom?.slice(0,12)||'-')}</span></div>`;
                         card.onclick = () => window.showPersonModal(pp.id);
                         grid.appendChild(card);
                     });
                     listDiv.innerHTML = ''; listDiv.appendChild(grid);
                 }
                 render();
-                filterBar.querySelectorAll('.rank-tab').forEach(btn => {
-                    btn.onclick = () => { filterBar.querySelectorAll('.rank-tab').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); sortType = btn.dataset.sort; render(); };
-                });
+                filterBar.querySelectorAll('.rank-tab').forEach(btn => { btn.onclick = () => { filterBar.querySelectorAll('.rank-tab').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); sortType = btn.dataset.sort; render(); }; });
                 filterBar.querySelector('#schoolSelect').onchange = (e) => { schoolFilter = e.target.value; render(); };
             }); 
         }
@@ -708,10 +744,9 @@
         window.setFilter=function(n){ activeFilter=activeFilter===n?null:n; refreshFilter(); drawGraph(); };
         window.clearFilter=function(){ activeFilter=null; refreshFilter(); drawGraph(); };
         
-        function updateMobileDetail(id){ let p=persons.find(p=>p.id===id); if(!p)return; let rels=relations.filter(r=>r.sourceId===id||r.targetId===id); let relHtml=rels.map(r=>{ let oid=r.sourceId===id?r.targetId:r.sourceId; let o=persons.find(px=>px.id===oid); return `<div style="padding:8px 0;border-bottom:1px solid rgba(255,180,140,0.15);color:#ccaa88;"><strong style="color:#ffaa88;">${escapeHtml(r.name)}</strong> ${r.sourceId===id?'→':'←'} ${escapeHtml(o?.name||'未知')}</div>`; }).join('')||'<div style="color:#ccaa88;">无关系</div>'; let avatarHtml=`<div id="mobile-avatar-${p.id}" style="width:120px;height:120px;margin:0 auto;border-radius:20px;overflow:hidden;background:#2a2545;"><div class="avatar-placeholder"><i class="fas fa-spinner fa-pulse"></i><span style="color:#888;">加载中...</span></div></div>`; let dpsDisplay = getDpsDisplayValue(p); let combatMobileHtml=`<div class="combat-btn" style="margin:12px 0;color:#ffcfaa;" onclick="toggleMobileCombat(${p.id})"><i class="fas fa-chart-simple"></i> <span id="mobileCombatBtnText-${p.id}" style="color:#ffcfaa;">显示战力详情</span></div><div id="mobileCombatPanel-${p.id}" style="display:none;background:rgba(0,0,0,0.3);border-radius:12px;padding:12px;margin-bottom:12px;"><div><span style="color:#ffaa88;">套装:</span> <span style="color:#f0e6d8;">${escapeHtml(p.custom||'-')}</span></div><div><span style="color:#ffaa88;">心法:</span> <span style="color:#f0e6d8;">${escapeHtml(p.book||'-')}</span></div><div><span style="color:#ffaa88;">最高造诣:</span> <span style="color:#f0e6d8;">${escapeHtml(p.skill||'-')}</span></div><div><span style="color:#ffaa88;">最高秒伤:</span> <span style="color:#f0e6d8;">${dpsDisplay}</span></div><div class="notice-text" style="font-size:10px;margin-top:6px;color:#ccaa88;"><i class="fas fa-info-circle"></i><span>秒伤括号内容为食物、服帖、天工、精元缩写</span></div></div>`; let html=`${avatarHtml}<div style="text-align:center;font-size:20px;font-weight:bold;color:#ffdd99;margin:12px 0;">${escapeHtml(p.name)}</div><div style="background:rgba(0,0,0,0.3);padding:12px;border-radius:16px;color:#f0e6d8;"><div><span style="color:#ffaa88;">流派:</span> ${escapeHtml(p.title||'-')}</div><div><span style="color:#ffaa88;">门派:</span> ${escapeHtml(p.school||'-')}</div><div><span style="color:#ffaa88;">关系数:</span> ${rels.length}</div>${combatMobileHtml}</div><div style="margin-top:12px;"><div style="color:#ffaa88;">关系列表</div><div style="color:#ccaa88;">${relHtml}</div></div>`; document.getElementById('mobileDetailContent').innerHTML=html; loadAvatar(p.id,(img)=>{ let c=document.getElementById(`mobile-avatar-${p.id}`); if(c&&img){ c.innerHTML=''; let im=document.createElement('img'); im.src=img.src; im.style.width='100%'; im.style.height='100%'; im.style.objectFit='cover'; c.appendChild(im); } }); }
+        function updateMobileDetail(id){ let p=persons.find(p=>p.id===id); if(!p)return; let rels=relations.filter(r=>r.sourceId===id||r.targetId===id); let relHtml=rels.map(r=>{ let oid=r.sourceId===id?r.targetId:r.sourceId; let o=persons.find(px=>px.id===oid); return `<div style="padding:8px 0;border-bottom:1px solid rgba(255,180,140,0.15);color:#ccaa88;"><strong style="color:#ffaa88;">${escapeHtml(r.name)}</strong> ${r.sourceId===id?'→':'←'} ${escapeHtml(o?.name||'未知')}</div>`; }).join('')||'<div style="color:#ccaa88;">无关系</div>'; let avatarHtml=`<div id="mobile-avatar-${p.id}" style="width:120px;height:120px;margin:0 auto;border-radius:20px;overflow:hidden;background:#2a2545;"><div class="avatar-placeholder"><i class="fas fa-spinner fa-pulse"></i><span style="color:#888;">加载中...</span></div></div>`; let dpsDisplay = getDpsDisplayValue(p); let combatMobileHtml=`<div class="combat-btn" style="margin:12px 0;color:#ffcfaa;" onclick="toggleMobileCombat(${p.id})"><i class="fas fa-chart-simple"></i> <span id="mobileCombatBtnText-${p.id}" style="color:#ffcfaa;">显示战力详情</span></div><div id="mobileCombatPanel-${p.id}" style="display:none;background:rgba(0,0,0,0.3);border-radius:12px;padding:12px;margin-bottom:12px;"><div><span style="color:#ffaa88;">套装:</span> <span style="color:#f0e6d8;">${escapeHtml(p.custom||'-')}</span></div><div><span style="color:#ffaa88;">心法:</span> <span style="color:#f0e6d8;">${escapeHtml(p.book||'-')}</span></div><div><span style="color:#ffaa88;">最高造诣:</span> <span style="color:#f0e6d8;">${escapeHtml(p.skill||'-')}</span></div><div><span style="color:#ffaa88;">最高秒伤:</span> <span style="color:#f0e6d8;">${dpsDisplay}</span></div><div class="notice-text" style="font-size:10px;margin-top:6px;color:#ccaa88;"><i class="fas fa-info-circle"></i><span>秒伤括号内容为食物、服帖、天工、精元缩写</span></div></div>`; let html=`${avatarHtml}<div style="text-align:center;font-size:20px;font-weight:bold;color:#ffdd99;margin:12px 0;">${escapeHtml(p.name)}</div><div style="background:rgba(0,0,0,0.3);padding:12px;border-radius:16px;color:#f0e6d8;"><div><span style="color:#ffaa88;">流派:</span> ${escapeHtml(p.title||'-')}</div><div><span style="color:#ffaa88;">门派:</span> ${escapeHtml(p.school||'-')}</div><div><span style="color:#ffaa88;">关系数:</span> ${rels.length}</div>${combatMobileHtml}</div><div style="margin-top:12px;"><div style="color:#ffaa88;">关系列表</div><div style="color:#ccaa88;">${relHtml}</div></div>`; document.getElementById('mobileDetailContent').innerHTML=html; loadAvatar(p.id,(img)=>{ let c=document.getElementById(`mobile-avatar-${p.id}`); if(c&&img){ c.innerHTML=''; c.style.background='transparent'; let im=document.createElement('img'); im.src=img.src; im.style.width='100%'; im.style.height='100%'; im.style.objectFit='cover'; im.style.cursor='pointer'; im.onclick=(e)=>{ e.stopPropagation(); showImageModal(img.src); }; c.appendChild(im); } }); }
         window.toggleMobileCombat = function(id){ let panel=document.getElementById(`mobileCombatPanel-${id}`); let btn=document.getElementById(`mobileCombatBtnText-${id}`); if(panel){ if(panel.style.display==='none'){ panel.style.display='block'; if(btn) btn.innerText='隐藏战力详情'; }else{ panel.style.display='none'; if(btn) btn.innerText='显示战力详情'; } } };
         
-        // 设置底部提示文字
         function setFooterNote() {
             const footerNote = document.getElementById('footerNote');
             if (isMobile()) {
@@ -728,7 +763,6 @@
             document.getElementById('panelCloseBtn').addEventListener('click',()=>document.getElementById('floatPanel').classList.remove('show'));
             document.getElementById('clearFilterBtn').addEventListener('click',()=>{ activeFilter=null; refreshFilter(); drawGraph(); });
             
-            // 左侧箭头折叠功能
             const panelTab = document.getElementById('panelTab');
             const detailPanel = document.getElementById('detailPanel');
             panelTab.addEventListener('click', () => {
@@ -746,11 +780,12 @@
             document.getElementById('schoolSortBtn').onclick=()=>{ document.getElementById('rightFuncPanel').classList.remove('open'); openSchool(); };
             document.getElementById('factionSortBtn').onclick=()=>{ document.getElementById('rightFuncPanel').classList.remove('open'); openFaction(); };
             
-            // 电脑端搜索框
+            // 图例按钮
+            document.getElementById('pcLegendBtn').onclick = () => showLegend();
+            document.getElementById('mobileLegendBtn').onclick = () => showLegend();
+            
             let searchInput = document.getElementById('searchInput');
             searchInput.addEventListener('keypress', (e) => { if(e.key === 'Enter') searchAndFocus(searchInput.value, false); });
-            
-            // 手机端搜索框
             let mobileSearchInput = document.getElementById('mobileSearchInput');
             mobileSearchInput.addEventListener('keypress', (e) => { if(e.key === 'Enter') { searchAndFocus(mobileSearchInput.value, true); mobileSearchInput.value = ''; } });
             
